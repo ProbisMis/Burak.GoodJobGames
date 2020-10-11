@@ -7,9 +7,10 @@ namespace Burak.GoodJobGames.Data.EntityModels
     /// <summary>
     /// User Migration DB Entity class
     /// </summary>
-    public class User : IEntity<Guid>, ISoftDelete
+    public class User : IEntity<int>, ISoftDelete
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
+        public Guid GID { get; set; }
         public string Username { get; set; }
         public string Password { get; set; } 
         public bool IsDeleted { get; set; }

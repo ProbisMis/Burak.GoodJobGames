@@ -110,7 +110,7 @@ namespace Burak.GoodJobGames.Controllers
         /// <param name="userRequest"></param>
         /// <returns></returns>
         [HttpGet("profile/{userId}")]
-        public async Task<UserResponse> GetUser([FromRoute] Guid userId)
+        public async Task<UserResponse> GetUser([FromRoute] int userId)
         {
             if (userId == null)
                 throw new NotFoundException("User can not be found");

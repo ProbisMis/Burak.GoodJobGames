@@ -13,7 +13,8 @@ namespace Burak.GoodJobGames.Business.Services.Interface
 
         Task<User> CreateUser(User user);
         Task<User> UpdateUser(User user);
-        Task<User> GetUserById(Guid userId);
+        Task<User> GetUserById(int userId);
+        Task<User> GetUserByGuid(Guid userGuid);
         Task<User> DeleteUser(User user);
         Task<User> GetUserByUsername(string username);
         Task<User> GetUserByEmail(string email);

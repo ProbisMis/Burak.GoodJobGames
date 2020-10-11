@@ -108,9 +108,15 @@ namespace Burak.GoodJobGames.Business.Services.Implementation
             return user;
         }
 
-        public async Task<User> GetUserById(Guid userId)
+        public async Task<User> GetUserById(int userId)
         {
             var user = _dataContext.Users.Where(x => x.Id == userId && !x.IsDeleted && x.IsActive).First();
+            return user;
+        }
+
+        public async Task<User> GetUserByGuid(Guid userGuid)
+        {
+            var user = _dataContext.Users.Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
             return user;
         }
 

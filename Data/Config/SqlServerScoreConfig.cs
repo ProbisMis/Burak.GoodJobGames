@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Burak.GoodJobGames.Data.Config
 {
-    public class SqlServerUserConfig : IEntityTypeConfiguration<User>
+    public class SqlServerScoreConfig : IEntityTypeConfiguration<Score>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public void Configure(EntityTypeBuilder<Score> builder)
         {
             builder.ToTable(nameof(User));
             builder.HasKey(model => model.Id);
