@@ -13,14 +13,11 @@ namespace Burak.GoodJobGames.Business.Services.Implementation
     public class ScoreService : IScoreService
     {
         private readonly DataContext _dataContext;
-        private readonly IConfiguration _configuration;
 
 
-        public ScoreService(DataContext dataContext,
-              IConfiguration configuration)
+        public ScoreService(DataContext dataContext)
         {
             _dataContext = dataContext;
-            _configuration = configuration;
         }
 
         public async Task SubmitScore(Score score)
@@ -48,7 +45,7 @@ namespace Burak.GoodJobGames.Business.Services.Implementation
             return true;
         }
 
-        public Score GetScoreByUserId(int userId)
+        public Score GetScoreByUserId(Guid userId)
         {
             var result = _dataContext.Scores.FirstOrDefault(x => x.UserId == userId);
             return result;

@@ -9,6 +9,6 @@ namespace Burak.GoodJobGames.Business.Services.Interface
     public interface IScoreService
     {
         Task SubmitScore(Score score);
-        Score GetScoreByUserId(int userId);
+        Score GetScoreByUserId(Guid userId);
     }
 }

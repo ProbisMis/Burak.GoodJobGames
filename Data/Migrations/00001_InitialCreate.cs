@@ -9,9 +9,22 @@ namespace Burak.GoodJobGames.Data.Migrations
     {
         public override void Up()
         {
+
+            Create.Table(nameof(Country)) //TODO: Seed with sample country
+              .WithColumn("Id").AsInt32().PrimaryKey().Identity()
+              .WithColumn("CountryName").AsString()
+              .WithColumn("CountryIsoCode").AsString();
+
+            //Seed
+            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "Turkey", CountryIsoCode = "TR" });
+            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "United States", CountryIsoCode = "US" });
+            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "United Kingdom", CountryIsoCode = "UK" });
+            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "France", CountryIsoCode = "FR" });
+
             Create.Table(nameof(User)) //Seed with sample users and give guid on documentation
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
-                .WithColumn("GID").AsGuid().Indexed().NotNullable()
+                .WithColumn("GID").AsGuid().Unique().NotNullable()
+                .WithColumn("CountryId").AsInt32().ForeignKey(nameof(Country), "Id")
                 .WithColumn("Username").AsString().Nullable()
                 .WithColumn("Password").AsString().Nullable()
                 .WithColumn("IsActive").AsBoolean().WithDefaultValue(true)
@@ -21,30 +34,25 @@ namespace Burak.GoodJobGames.Data.Migrations
                 .WithColumn("Token").AsString().Nullable();
 
             //Seed
-            Insert.IntoTable(nameof(User)).Row(new { GID = new Guid(), Username = "GJG-1" , Password = "123456"});
-            Insert.IntoTable(nameof(User)).Row(new { GID = new Guid(), Username = "GJG-2" , Password = "123456"});
-            Insert.IntoTable(nameof(User)).Row(new { GID = new Guid(), Username = "GJG-3" , Password = "123456"});
-            Insert.IntoTable(nameof(User)).Row(new { GID = new Guid(), Username = "GJG-4" , Password = "123456"});
+            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-1" , Password = "123456", CountryId = 1});
+            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-2" , Password = "123456", CountryId = 1 });
+            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-3" , Password = "123456", CountryId = 1 });
+            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-4" , Password = "123456", CountryId = 2 });
+            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-5" , Password = "123456", CountryId = 2 });
 
-            Create.Table(nameof(Country)) //TODO: Seed with sample country
-               .WithColumn("Id").AsInt32().PrimaryKey().Identity()
-               .WithColumn("CountryName").AsString()
-               .WithColumn("CountryIsoCode").AsString();
-
-            //Seed
-            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "Turkey", CountryIsoCode = "TR" });
-            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "United States", CountryIsoCode = "US" });
-            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "United Kingdom", CountryIsoCode = "UK" });
-            Insert.IntoTable(nameof(Country)).Row(new { CountryName = "France", CountryIsoCode = "FR" });
 
             Create.Table(nameof(Score))
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
-                .WithColumn("UserId").AsInt32().Indexed().ForeignKey(nameof(User), "Id")
-                .WithColumn("CountryId").AsInt32().ForeignKey(nameof(Country), "Id")
+                .WithColumn("UserId").AsGuid().ForeignKey(nameof(User), "GID")
                 .WithColumn("UserScore").AsInt32();
 
+            ////Seed
+            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 1, CountryId = 1 , UserScore = 100});
+            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 2, CountryId = 1 , UserScore = 200});
+            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 3, CountryId = 1 , UserScore = 300});
 
-           
+
+
         }
 
         public override void Down()

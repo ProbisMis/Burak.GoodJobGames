@@ -10,6 +10,7 @@ namespace Burak.GoodJobGames.Data.Config
         {
             builder.ToTable(nameof(Score));
             builder.HasKey(model => model.Id);
+            builder.HasOne(x => x.User).WithOne(c => c.Score).HasPrincipalKey<User>(x => x.GID).HasForeignKey<Score>(x => x.UserId);
         }
     }
 }

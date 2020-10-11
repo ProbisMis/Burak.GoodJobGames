@@ -7,7 +7,7 @@ namespace Burak.GoodJobGames.Models.Requests
 {
     public class ScoreRequest
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public int UserScore { get; set; }
     }
 }

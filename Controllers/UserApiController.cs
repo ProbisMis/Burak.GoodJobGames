@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Burak.GoodJobGames.Business.Services.Interface;
@@ -16,24 +17,26 @@ using ValidationException = FluentValidation.ValidationException;
 
 namespace Burak.GoodJobGames.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("user")]
     public class UserApiController : ControllerBase
     {
         private readonly ILogger<UserApiController> _logger;
         private readonly IUserService _userService;
+        private readonly IScoreService _scoreService;
         private readonly IValidatorResolver _validatorResolver;
         private readonly IMapper _mapper;
 
         public UserApiController(ILogger<UserApiController> logger,
             IUserService userService,
+            IScoreService scoreService,
             IValidatorResolver validatorResolver,
             IMapper mapper
             )
         {
             _logger = logger;
             _userService = userService;
+            _scoreService = scoreService;
             _validatorResolver = validatorResolver;
             _mapper = mapper;
         }
@@ -74,6 +77,9 @@ namespace Burak.GoodJobGames.Controllers
             var userResponse = _userService.CreateUser(user);
 
             var userResponseModel = _mapper.Map<UserResponse>(userResponse.Result);
+            userResponseModel.Score = 0;
+            //TODO: GET RANK
+
 
             return userResponseModel;
         }
@@ -103,25 +109,23 @@ namespace Burak.GoodJobGames.Controllers
             return userResponseModel;
         }
 
-
         /// <summary>
         /// Gets  user
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
         [HttpGet("profile/{userId}")]
-        public async Task<UserResponse> GetUser([FromRoute] int userId)
+        public async Task<UserResponse> GetUser([FromRoute] Guid userId)
         {
             if (userId == null)
                 throw new NotFoundException("User can not be found");
 
-            var user = _userService.GetUserById(userId);
+            var user = _userService.GetUserByGuid(userId);
 
             var userResponseModel = _mapper.Map<UserResponse>(user.Result);
 
             return userResponseModel;
         }
-
         #endregion
     } 
 }

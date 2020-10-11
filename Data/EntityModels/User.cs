@@ -15,10 +15,11 @@ namespace Burak.GoodJobGames.Data.EntityModels
         public string Password { get; set; } 
         public bool IsDeleted { get; set; }
         public bool IsActive { get; set; }
-        public string Email { get; set; }
         public string Token { get; set; }
-
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
+        public Score Score { get; set; }
+        public int CountryId { get; set; }
+        public Country Country { get; set; }
     }
 }

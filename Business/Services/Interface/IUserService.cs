@@ -9,14 +9,10 @@ namespace Burak.GoodJobGames.Business.Services.Interface
     {
         //Authentication
         Task<User> Authenticate(string username, string password);
-        Task<IEnumerable<User>> GetAll();
-
         Task<User> CreateUser(User user);
         Task<User> UpdateUser(User user);
         Task<User> GetUserById(int userId);
         Task<User> GetUserByGuid(Guid userGuid);
-        Task<User> DeleteUser(User user);
         Task<User> GetUserByUsername(string username);
-        Task<User> GetUserByEmail(string email);
     }
 }

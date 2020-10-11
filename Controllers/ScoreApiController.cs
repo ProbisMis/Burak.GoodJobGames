@@ -23,25 +23,22 @@ namespace Burak.GoodJobGames.Controllers
         private readonly ILogger<ScoreApiController> _logger;
         private readonly IValidatorResolver _validatorResolver;
         private readonly IScoreService _scoreService;
-        private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
         public ScoreApiController(ILogger<ScoreApiController> logger,
             IValidatorResolver validatorResolver,
             IMapper mapper,
-            IScoreService scoreService,
-            IUserService userService
+            IScoreService scoreService
             )
         {
             _logger = logger;
             _validatorResolver = validatorResolver;
             _mapper = mapper;
             _scoreService = scoreService;
-            _userService = userService;
         }
 
         [HttpPost("submit")]
-        public async Task SubmitScore([FromBody] ScoreRequest scoreRequest)
+        public async Task<ScoreResponse> SubmitScore([FromBody] ScoreRequest scoreRequest)
         {
             /* VALIDATE */
             var validator = _validatorResolver.Resolve<ScoreRequestValidator>();
@@ -54,6 +51,9 @@ namespace Burak.GoodJobGames.Controllers
             var score = _mapper.Map<Score>(scoreRequest);
 
             await _scoreService.SubmitScore(score);
+
+            var response = _scoreService.GetScoreByUserId(scoreRequest.UserId);
+            return _mapper.Map<ScoreResponse>(response);
         }
     }
 }

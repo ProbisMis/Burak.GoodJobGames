@@ -9,9 +9,8 @@ namespace Burak.GoodJobGames.Data.EntityModels
     public class Score : IEntity<int>
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
         public int UserScore { get; set; }
-        public int CountryId { get; set; }
-        public Country Country { get; set; }
     }
 }

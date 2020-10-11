@@ -11,5 +11,7 @@ namespace Burak.GoodJobGames.Data.EntityModels
         public int Id { get; set; }
         public int CountryName { get; set; }
         public int CountryIsoCode { get; set; }
+        
+        public User User { get; set; }
     }
 }

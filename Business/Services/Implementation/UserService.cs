@@ -27,16 +27,18 @@ namespace Burak.GoodJobGames.Business.Services.Implementation
     {
         private readonly DataContext _dataContext;
         private readonly IValidatorResolver _validatorResolver;
+        private readonly IScoreService _scoreService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(DataContext dataContext, IMapper mapper,
+        public UserService(DataContext dataContext, IMapper mapper, IScoreService scoreService,
              IValidatorResolver validatorResolver, IConfiguration configuration, ILogger<UserService> logger)
         {
             _dataContext = dataContext;
             _validatorResolver = validatorResolver;
             _configuration = configuration;
             _logger = logger;
+            _scoreService = scoreService;
         }
 
         public async Task<User> Authenticate(string username, string password)
@@ -76,53 +78,37 @@ namespace Burak.GoodJobGames.Business.Services.Implementation
             userRequest.CreatedOnUtc = updateDate;
             userRequest.UpdatedOnUtc = updateDate;
             userRequest.IsDeleted = false;
+            userRequest.GID = Guid.NewGuid();
+
             
             var user = _dataContext.Users.Add(userRequest);
+
+            await _scoreService.SubmitScore(new Score()
+            {
+                UserId = userRequest.GID,
+                UserScore = 0
+            });
+
             await _dataContext.SaveChangesAsync();
 
             return user.Entity;
-        }
-
-        public async Task<User> DeleteUser(User userRequest)
-        {
-            var updateDate = DateTime.Now;
-
-            userRequest.UpdatedOnUtc = updateDate;
-            userRequest.IsDeleted = true;
-
-            var user = _dataContext.Users.Update(userRequest);
-            await _dataContext.SaveChangesAsync();
-
-            return user.Entity;
-        }
-
-        public async Task<IEnumerable<User>> GetAll()
-        {
-            var users =  _dataContext.Users;
-            return users;
-        }
-
-        public async Task<User> GetUserByEmail(string email)
-        {
-            var user = _dataContext.Users.Where(x => x.Email == email && !x.IsDeleted && x.IsActive).First();
-            return user;
         }
 
         public async Task<User> GetUserById(int userId)
         {
-            var user = _dataContext.Users.Where(x => x.Id == userId && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.Id == userId && !x.IsDeleted && x.IsActive).First();
             return user;
         }
 
         public async Task<User> GetUserByGuid(Guid userGuid)
         {
-            var user = _dataContext.Users.Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
             return user;
         }
 
         public async Task<User> GetUserByUsername(string username)
         {
-            var user = _dataContext.Users.Where(x => x.Username == username && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.Username == username && !x.IsDeleted && x.IsActive).First();
             return user;
         }
 
