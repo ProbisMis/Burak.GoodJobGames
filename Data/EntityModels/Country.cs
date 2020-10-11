@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Burak.GoodJobGames.Data.EntityModels
 {
-    public class Score : IEntity<int>
+    public class Country : IEntity<int>
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
-        public int UserScore { get; set; }
-        public int CountryId { get; set; }
-        public Country Country { get; set; }
+        public int CountryName { get; set; }
+        public int CountryIsoCode { get; set; }
     }
 }

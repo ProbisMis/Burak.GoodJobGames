@@ -18,6 +18,7 @@ namespace Burak.GoodJobGames.Data
 
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Score> Scores { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
         //public virtual DbSet<AppointmentReview> AppointmentReviews { get; set; }
         //public virtual DbSet<Status> Statuses { get; set; }
         //public virtual DbSet<Slot> Slots { get; set; }

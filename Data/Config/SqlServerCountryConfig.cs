@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Burak.GoodJobGames.Data.Config
 {
-    public class SqlServerScoreConfig : IEntityTypeConfiguration<Score>
+    public class SqlServerCountryConfig : IEntityTypeConfiguration<Country>
     {
-        public void Configure(EntityTypeBuilder<Score> builder)
+        public void Configure(EntityTypeBuilder<Country> builder)
         {
-            builder.ToTable(nameof(Score));
+            builder.ToTable(nameof(Country));
             builder.HasKey(model => model.Id);
         }
     }

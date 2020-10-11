@@ -124,6 +124,7 @@ namespace Burak.GoodJobGames
         {
             //TODO: Create and add which model mapped to which
             services.AddAutoMapper(typeof(UserMappingProfiles));
+            services.AddAutoMapper(typeof(ScoreMappingProfiles));
         }
 
         private void AddValidations(IServiceCollection services)
@@ -131,12 +132,14 @@ namespace Burak.GoodJobGames
             //TODO: Add Request Validators
             services.AddSingleton<IValidatorResolver, ValidatorResolver>();
             services.AddSingleton<IValidator, UserRequestValidator>();
+            services.AddSingleton<IValidator, ScoreRequestValidator>();
         }
 
         private void AddBusinessServices(IServiceCollection services)
         {
             //TODO: Add Services (external,internal)
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IScoreService, ScoreService>();
         }
     }
 }
