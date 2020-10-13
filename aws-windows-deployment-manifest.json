@@ -1,0 +1,16 @@
+{
+  "manifestVersion": 9,
+  "deployments": {
+
+    "aspNetCoreWeb": [
+      {
+        "name": "Sample Deployment-9",
+        "parameters": {
+          "appBundle": "/",
+          "iisPath": "/",
+          "iisWebSite": "Default Web Site"
+        }
+      }
+    ]
+  }
+}
