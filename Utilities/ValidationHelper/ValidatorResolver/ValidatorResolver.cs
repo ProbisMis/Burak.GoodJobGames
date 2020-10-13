@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 
-namespace Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver
+namespace GoodJobGames.Utilities.ValidationHelper.ValidatorResolver
 {
     public class ValidatorResolver : IValidatorResolver
     {
