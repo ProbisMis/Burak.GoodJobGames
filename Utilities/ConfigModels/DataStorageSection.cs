@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Burak.GoodJobGames.Utilities.ConfigModels
+namespace GoodJobGames.Utilities.ConfigModels
 {
     public class DataStorageSection
     {
@@ -17,6 +17,7 @@ namespace Burak.GoodJobGames.Utilities.ConfigModels
 
     public enum DataStorageTypes
     {
-        SqlServer = 1
+        SqlServer = 1,
+        RDS = 2
     }
 }

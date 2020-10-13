@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Burak.GoodJobGames.Models.Responses
+namespace GoodJobGames.Models.Responses
 {
     public abstract class BaseCollectionResponse<T>
     {

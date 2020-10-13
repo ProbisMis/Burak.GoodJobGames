@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Models.Requests
+namespace GoodJobGames.Models.Requests
 {
     public class LoginRequest
     {

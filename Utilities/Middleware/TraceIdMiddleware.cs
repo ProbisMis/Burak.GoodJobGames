@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
-namespace Burak.GoodJobGames.Utilities.Middleware
+namespace GoodJobGames.Utilities.Middleware
 {
     public class TraceIdMiddleware
     {

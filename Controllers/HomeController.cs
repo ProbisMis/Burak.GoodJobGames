@@ -2,7 +2,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Burak.GoodJobGames.Controllers
+namespace GoodJobGames.Controllers
 {
     [Route("")]
     public class HomeController : ControllerBase

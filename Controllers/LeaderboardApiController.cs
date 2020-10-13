@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
-using Burak.GoodJobGames.Business.Services.Interface;
-using Burak.GoodJobGames.Models.CustomExceptions;
-using Burak.GoodJobGames.Models.Responses;
-using Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
+using GoodJobGames.Business.Services.Interface;
+using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Controllers
+namespace GoodJobGames.Controllers
 {
+
+    [ApiController]
+    [Route("score")]
     public class LeaderboardApiController : ControllerBase
     {
         private readonly ILogger<LeaderboardApiController> _logger;
@@ -19,12 +19,14 @@ namespace Burak.GoodJobGames.Controllers
         private readonly IScoreService _scoreService;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IDistributedCache _distributedCache;
 
         public LeaderboardApiController(ILogger<LeaderboardApiController> logger,
             IValidatorResolver validatorResolver,
             IMapper mapper,
             IScoreService scoreService,
-            IUserService userService
+            IUserService userService,
+            IDistributedCache distributedCache
             )
         {
             _logger = logger;
@@ -32,20 +34,35 @@ namespace Burak.GoodJobGames.Controllers
             _mapper = mapper;
             _scoreService = scoreService;
             _userService = userService;
+            _distributedCache = distributedCache;
         }
 
 
-        ///// <summary>
-        ///// Gets  user
-        ///// </summary>
-        ///// <param name="userRequest"></param>
-        ///// <returns></returns>
-        //[HttpGet("")]
-        //public async Task<List<LeaderboardResponse>> GetLeaderboard()
-        //{
-        //    var result = _scoreService.
+        /// <summary>
+        /// Gets  user
+        /// </summary>
+        /// <param name="userRequest"></param>
+        /// <returns></returns>
+        [HttpGet("")]
+        public async Task GetLeaderboard()
+        {
+            //<List<LeaderboardResponse>>
+            await RedisHelper.SetAsync("hello", "world");
+            await _distributedCache.SetAsync("hello", Encoding.ASCII.GetBytes("world"));
+        }
 
-        //    return userResponseModel;
-        //}
+        /// <summary>
+        /// Gets  user
+        /// </summary>
+        /// <param name="userRequest"></param>
+        /// <returns></returns>
+        [HttpGet("try")]
+        public async Task<string> GetLeaderboardTry()
+        {
+            //<List<LeaderboardResponse>>
+            //var x = await RedisHelper.GetAsync("hello");
+            var x =  await _distributedCache.GetAsync("hello");
+            return Encoding.ASCII.GetString(x);
+        }
     }
 }

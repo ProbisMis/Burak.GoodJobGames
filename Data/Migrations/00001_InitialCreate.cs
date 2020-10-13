@@ -1,8 +1,8 @@
 ﻿using FluentMigrator;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Data.EntityModels;
 using System;
 
-namespace Burak.GoodJobGames.Data.Migrations
+namespace GoodJobGames.Data.Migrations
 {
     [Migration(1)]
     public partial class _00001_InitialCreate : Migration

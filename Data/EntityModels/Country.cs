@@ -1,10 +1,10 @@
-﻿using Burak.GoodJobGames.Models.BaseModel;
+﻿using GoodJobGames.Models.BaseModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Data.EntityModels
+namespace GoodJobGames.Data.EntityModels
 {
     public class Country : IEntity<int>
     {

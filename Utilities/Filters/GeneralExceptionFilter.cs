@@ -1,12 +1,12 @@
 using System;
 using System.Net;
-using Burak.GoodJobGames.Models.CustomExceptions;
-using Burak.GoodJobGames.Models.Responses;
+using GoodJobGames.Models.CustomExceptions;
+using GoodJobGames.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace Burak.GoodJobGames.Utilities.Filters
+namespace GoodJobGames.Utilities.Filters
 {
     public class GeneralExceptionFilter : IExceptionFilter
     {

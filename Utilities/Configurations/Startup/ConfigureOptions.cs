@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Burak.GoodJobGames.Utilities.Configurations.Startup
+namespace GoodJobGames.Utilities.Configurations.Startup
 {
     public static class ConfigureOptions
     {

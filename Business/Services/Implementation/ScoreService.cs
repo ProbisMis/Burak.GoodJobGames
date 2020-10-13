@@ -1,14 +1,14 @@
 ﻿using AutoMapper.Configuration;
-using Burak.GoodJobGames.Business.Services.Interface;
-using Burak.GoodJobGames.Data;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Business.Services.Interface;
+using GoodJobGames.Data;
+using GoodJobGames.Data.EntityModels;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Business.Services.Implementation
+namespace GoodJobGames.Business.Services.Implementation
 {
     public class ScoreService : IScoreService
     {

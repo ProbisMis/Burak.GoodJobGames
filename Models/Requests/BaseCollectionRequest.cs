@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Burak.GoodJobGames.Models.Requests
+namespace GoodJobGames.Models.Requests
 {
     public class BaseCollectionRequest
     {

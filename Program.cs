@@ -4,13 +4,11 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using NLog;
-using NLog.Web;
-using Burak.GoodJobGames.Data;
-using Burak.GoodJobGames.Utilities.Constants;
-using Burak.GoodJobGames.Utilities.Helper;
+using GoodJobGames.Data;
+using GoodJobGames.Utilities.Constants;
+using GoodJobGames.Utilities.Helper;
 
-namespace Burak.GoodJobGames
+namespace GoodJobGames
 {
     public class Program
     {
@@ -18,7 +16,7 @@ namespace Burak.GoodJobGames
 
         public static void Main(string[] args)
         {
-            Logger logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            //Logger logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
 
             try
             {
@@ -26,22 +24,23 @@ namespace Burak.GoodJobGames
                                             .AddJsonFile(appSettingsFile, optional: false)
                                             .Build();
 
-                logger.Info($"{AppConstants.SolutionName}.Api trigger migration");
+                //logger.Info($"{AppConstants.SolutionName}.Api trigger migration");
                 RunMigration(config);
 
-                logger.Info($"{AppConstants.SolutionName}.Api is starting");
+                //logger.Info($"{AppConstants.SolutionName}.Api is starting");
                 var webHost = BuildWebHost(args, config);
 
                 webHost.Run();
             }
             catch (Exception ex)
             {
-                logger.Fatal(ex);
+            //    logger.Info($"{AppConstants.SolutionName}.Api is caught exception {ex}");
+            //    logger.Fatal(ex);
             }
             finally
             {
-                logger.Info($"{AppConstants.SolutionName}.Api is shutting down");
-                LogManager.Shutdown();
+                //logger.Info($"{AppConstants.SolutionName}.Api is shutting down");
+                //LogManager.Shutdown();
             }
         }
 
@@ -58,6 +57,9 @@ namespace Burak.GoodJobGames
             var urls = c.GetSection("AspNetCoreUrls").Get<string[]>();
 
             return WebHost.CreateDefaultBuilder(args)
+                          .UseKestrel()
+                          .UseContentRoot(Directory.GetCurrentDirectory())
+                          .UseIISIntegration()
                           .UseStartup<Startup>()
                           .ConfigureAppConfiguration((hostingContext, config) =>
                           {
@@ -65,7 +67,7 @@ namespace Burak.GoodJobGames
                                     .AddJsonFile(appSettingsFile, false);
                           })
                           .UseUrls(urls)
-                          .UseNLog()
+                          //.UseNLog()
                           .Build();
         }
     }

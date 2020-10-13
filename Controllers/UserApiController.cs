@@ -2,20 +2,20 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
-using Burak.GoodJobGames.Business.Services.Interface;
-using Burak.GoodJobGames.Business.Validators;
-using Burak.GoodJobGames.Data.EntityModels;
-using Burak.GoodJobGames.Models.CustomExceptions;
-using Burak.GoodJobGames.Models.Requests;
-using Burak.GoodJobGames.Models.Responses;
-using Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
+using GoodJobGames.Business.Services.Interface;
+using GoodJobGames.Business.Validators;
+using GoodJobGames.Data.EntityModels;
+using GoodJobGames.Models.CustomExceptions;
+using GoodJobGames.Models.Requests;
+using GoodJobGames.Models.Responses;
+using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ValidationException = FluentValidation.ValidationException;
 
-namespace Burak.GoodJobGames.Controllers
+namespace GoodJobGames.Controllers
 {
     [ApiController]
     [Route("user")]

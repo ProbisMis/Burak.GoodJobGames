@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Data.EntityModels;
 
-namespace Burak.GoodJobGames.Business.Services.Interface
+namespace GoodJobGames.Business.Services.Interface
 {
     public interface IUserService
     {

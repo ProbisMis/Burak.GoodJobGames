@@ -1,9 +1,9 @@
-﻿using Burak.GoodJobGames.Models.Requests;
-using Burak.GoodJobGames.Utilities.ValidationHelper;
+﻿using GoodJobGames.Models.Requests;
+using GoodJobGames.Utilities.ValidationHelper;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace Burak.GoodJobGames.Business.Validators
+namespace GoodJobGames.Business.Validators
 {
     public class ScoreRequestValidator : AbstractValidator<ScoreRequest>
     {

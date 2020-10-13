@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Data.EntityModels;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Burak.GoodJobGames.Data.Config
+namespace GoodJobGames.Data.Config
 {
     public class SqlServerUserConfig : IEntityTypeConfiguration<User>
     {

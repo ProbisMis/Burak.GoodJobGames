@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 
-namespace Burak.GoodJobGames.Utilities.ValidationHelper
+namespace GoodJobGames.Utilities.ValidationHelper
 {
     public static class PreValidations
     {

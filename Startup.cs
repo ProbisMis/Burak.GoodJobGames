@@ -7,25 +7,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using NLog.Extensions.Logging;
-using Burak.GoodJobGames.Data;
-using Burak.GoodJobGames.Business.Mappers;
-using Burak.GoodJobGames.Business.Validators;
-using Burak.GoodJobGames.Utilities.Middleware;
-using Burak.GoodJobGames.Utilities.ConfigModels;
-using Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
+using GoodJobGames.Data;
+using GoodJobGames.Business.Mappers;
+using GoodJobGames.Business.Validators;
+using GoodJobGames.Utilities.Middleware;
+using GoodJobGames.Utilities.ConfigModels;
+using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using Microsoft.EntityFrameworkCore;
-using Burak.GoodJobGames.Business.Services.Implementation;
-using Burak.GoodJobGames.Utilities.Constants;
+using GoodJobGames.Business.Services.Implementation;
+using GoodJobGames.Utilities.Constants;
 using System.Text;
-using Burak.GoodJobGames.Business.Services.Interface;
-using Burak.GoodJobGames.Utilities.Configurations.Startup;
-using Burak.GoodJobGames.Utilities.Filters;
-using Burak.GoodJobGames.Utilities.Helper;
+using GoodJobGames.Business.Services.Interface;
+using GoodJobGames.Utilities.Configurations.Startup;
+using GoodJobGames.Utilities.Filters;
+using GoodJobGames.Utilities.Helper;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Http;
 
-namespace Burak.GoodJobGames
+namespace GoodJobGames
 {
     public class Startup
     {
@@ -41,34 +43,49 @@ namespace Burak.GoodJobGames
         {
             services.AddControllers();
 
-            services.AddLogging(builder => builder.AddNLog());
+            //services.AddLogging(builder => builder.AddNLog());
             services.AddOptionsConfiguration(Configuration);
             services.AddMvc(options => options.Filters.Add<GeneralExceptionFilter>());
-            services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddMvc(options => options.EnableEndpointRouting = true);
+
+            //var csredis = new CSRedis.CSRedisClient("mymaster,password=123,prefix=my_",
+            //    new[] { "127.0.0.1:26379", "192.169.1.11:26379", "192.169.1.12:26379" });
+            //RedisHelper.Initialization(csredis);
+            //services.AddSingleton<IDistributedCache>(new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
+            var csredis = new CSRedis.CSRedisClient("rgjg-edis-2.81gayg.ng.0001.euc1.cache.amazonaws.com:6379");
+            RedisHelper.Initialization(csredis);
+            services.AddSingleton<IDistributedCache>(new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
+            //ConnectionMultiplexer.Connect("gjgredis.81gayg.ng.0001.euc1.cache.amazonaws.com:6379");
+            //services.AddDistributedRedisCache(option =>
+            //{
+            //    option.Configuration = "127.0.0.1:6379";
+            //    option.InstanceName = "master";
+            //});
+
             AddSelectedDataStorage(services);
             AddMappers(services);
             AddValidations(services);
             AddBusinessServices(services);
 
-            // JWT authentication Aayarlaması
-            var key = Encoding.ASCII.GetBytes(AppConstants.JWTSecretKey);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+            //// JWT authentication Aayarlaması
+            //var key = Encoding.ASCII.GetBytes(AppConstants.JWTSecretKey);
+            //services.AddAuthentication(x =>
+            //{
+            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer(x =>
+            //{
+            //    x.RequireHttpsMetadata = false;
+            //    x.SaveToken = true;
+            //    x.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuerSigningKey = true,
+            //        IssuerSigningKey = new SymmetricSecurityKey(key),
+            //        ValidateIssuer = false,
+            //        ValidateAudience = false
+            //    };
+            //});
 
             services.AddSwaggerGen(c =>
             c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "Game API", Version = "v1" }));
@@ -92,11 +109,9 @@ namespace Burak.GoodJobGames
                 c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "Game API");
             });
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -104,6 +119,8 @@ namespace Burak.GoodJobGames
             });
 
             app.UseTraceIdMiddleware();
+
+            app.Run(context => context.Response.WriteAsync("Hello World, from ASP.NET COREREERE!"));
         }
 
         private void AddSelectedDataStorage(IServiceCollection services)
@@ -113,6 +130,9 @@ namespace Burak.GoodJobGames
             switch (dataStorage.DataStorageType)
             {
                 case DataStorageTypes.SqlServer:
+                    services.AddDbContext<DataContext>(builder => builder.UseSqlServer(dataStorage.ConnectionString));
+                    break;
+                case DataStorageTypes.RDS:
                     services.AddDbContext<DataContext>(builder => builder.UseSqlServer(dataStorage.ConnectionString));
                     break;
                 default:

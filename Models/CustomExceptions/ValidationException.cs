@@ -1,6 +1,6 @@
 using System;
 
-namespace Burak.GoodJobGames.Models.CustomExceptions
+namespace GoodJobGames.Models.CustomExceptions
 {
     public class ValidationException : Exception
     {

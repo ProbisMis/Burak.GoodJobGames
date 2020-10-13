@@ -1,9 +1,9 @@
 using AutoMapper;
-using Burak.GoodJobGames.Models.Requests;
-using Burak.GoodJobGames.Models.Responses;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Models.Requests;
+using GoodJobGames.Models.Responses;
+using GoodJobGames.Data.EntityModels;
 
-namespace Burak.GoodJobGames.Business.Mappers
+namespace GoodJobGames.Business.Mappers
 {
     public class UserMappingProfiles : Profile
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Burak.GoodJobGames.Utilities.ConfigModels;
-using Burak.GoodJobGames.Utilities.Constants;
+using GoodJobGames.Utilities.ConfigModels;
+using GoodJobGames.Utilities.Constants;
 using Microsoft.Extensions.Configuration;
 
-namespace Burak.GoodJobGames.Utilities.Helper
+namespace GoodJobGames.Utilities.Helper
 {
     public class ConfigurationHelper
     {

@@ -2,26 +2,26 @@
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Burak.GoodJobGames.Business.Validators;
-using Burak.GoodJobGames.Data;
-using Burak.GoodJobGames.Data.EntityModels;
-using Burak.GoodJobGames.Models.Requests;
-using Burak.GoodJobGames.Models.Responses;
-using Burak.GoodJobGames.Utilities.Constants;
-using Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
+using GoodJobGames.Business.Validators;
+using GoodJobGames.Data;
+using GoodJobGames.Data.EntityModels;
+using GoodJobGames.Models.Requests;
+using GoodJobGames.Models.Responses;
+using GoodJobGames.Utilities.Constants;
+using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Burak.GoodJobGames.Models.CustomExceptions;
+using GoodJobGames.Models.CustomExceptions;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using Burak.GoodJobGames.Business.Services.Interface;
+using GoodJobGames.Business.Services.Interface;
 
-namespace Burak.GoodJobGames.Business.Services.Implementation
+namespace GoodJobGames.Business.Services.Implementation
 {
     public class UserService : IUserService
     {

@@ -1,4 +1,4 @@
-﻿namespace Burak.GoodJobGames.Models.BaseModel
+﻿namespace GoodJobGames.Models.BaseModel
 {
     public interface ISoftDelete
     {

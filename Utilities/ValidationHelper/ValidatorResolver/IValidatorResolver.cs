@@ -1,4 +1,4 @@
-﻿namespace Burak.GoodJobGames.Utilities.ValidationHelper.ValidatorResolver
+﻿namespace GoodJobGames.Utilities.ValidationHelper.ValidatorResolver
 {
     public interface IValidatorResolver
     {

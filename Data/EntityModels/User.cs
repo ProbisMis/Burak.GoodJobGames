@@ -1,8 +1,8 @@
-﻿using Burak.GoodJobGames.Models.BaseModel;
+﻿using GoodJobGames.Models.BaseModel;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Burak.GoodJobGames.Data.EntityModels
+namespace GoodJobGames.Data.EntityModels
 {
     /// <summary>
     /// User Migration DB Entity class

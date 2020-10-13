@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:57562/",
       "sslPort": 0
@@ -16,8 +20,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Burak.GoodJobGames": {
-      "commandName": "Project",
+    "GoodJobGames": {
+      "commandName": "IIS",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

@@ -1,9 +1,9 @@
 ﻿using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
-using Burak.GoodJobGames.Utilities.ConfigModels;
+using GoodJobGames.Utilities.ConfigModels;
 using System;
 
-namespace Burak.GoodJobGames.Data
+namespace GoodJobGames.Data
 {
     public class DbMigrationEngine
     {
@@ -40,6 +40,15 @@ namespace Burak.GoodJobGames.Data
                         .AddFluentMigratorCore()
                         .ConfigureRunner(rb => rb
                             .AddSqlServer()
+                            .WithGlobalConnectionString(dbConnectionString)
+                            .ScanIn(typeof(DbMigrationEngine).Assembly).For.Migrations())
+                        .AddLogging(lb => lb.AddFluentMigratorConsole())
+                        .BuildServiceProvider(false);
+                case DataStorageTypes.RDS:
+                    return new ServiceCollection()
+                        .AddFluentMigratorCore()
+                        .ConfigureRunner(rb => rb
+                            .AddMySql5()
                             .WithGlobalConnectionString(dbConnectionString)
                             .ScanIn(typeof(DbMigrationEngine).Assembly).For.Migrations())
                         .AddLogging(lb => lb.AddFluentMigratorConsole())

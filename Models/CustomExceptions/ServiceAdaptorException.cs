@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Models.CustomExceptions
+namespace GoodJobGames.Models.CustomExceptions
 {
     public class ServiceAdaptorException
     {

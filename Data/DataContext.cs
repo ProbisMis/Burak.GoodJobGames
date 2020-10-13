@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Burak.GoodJobGames.Data.EntityModels;
+using GoodJobGames.Data.EntityModels;
 
-namespace Burak.GoodJobGames.Data
+namespace GoodJobGames.Data
 {
     public class DataContext : DbContext
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Burak.GoodJobGames.Models.Responses
+namespace GoodJobGames.Models.Responses
 {
     public class LeaderboardResponse
     {
