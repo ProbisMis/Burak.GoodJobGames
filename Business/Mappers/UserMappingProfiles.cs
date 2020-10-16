@@ -15,7 +15,12 @@ namespace GoodJobGames.Business.Mappers
             //    .ForMember(x => x.Status, opt => opt.Ignore())
             //    .ForMember(x => x.Slot, opt => opt.Ignore());
             base.CreateMap<UserRequest, User>().ReverseMap();
-            base.CreateMap<UserResponse, User>().ReverseMap();
+            base.CreateMap<UserResponse, User>().ReverseMap().ForMember(destination => destination.Score,
+               opts => opts.MapFrom(source => source.Score.UserScore));
+
+            base.CreateMap<UserResponse, ScoreRequest>().ReverseMap();
+
+
             //CreateMap<Data.EntityModels.Appointment, AppointmentResponse>();
         }
     }

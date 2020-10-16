@@ -8,6 +8,7 @@ namespace GoodJobGames.Models.Requests
     public class ScoreRequest
     {
         public Guid UserId { get; set; }
-        public int UserScore { get; set; }
+        public string Username { get; set; }
+        public int Score { get; set; }
     }
 }

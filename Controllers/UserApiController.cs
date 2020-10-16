@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ValidationException = FluentValidation.ValidationException;
+using GoodJobGames.Models;
+using GoodJobGames.Utilities.Constants;
 
 namespace GoodJobGames.Controllers
 {
@@ -21,17 +23,23 @@ namespace GoodJobGames.Controllers
     [Route("user")]
     public class UserApiController : ControllerBase
     {
+        
+
         private readonly ILogger<UserApiController> _logger;
         private readonly IUserService _userService;
         private readonly IScoreService _scoreService;
         private readonly IValidatorResolver _validatorResolver;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
+        private readonly ICountryService _countryService;
 
         public UserApiController(ILogger<UserApiController> logger,
             IUserService userService,
             IScoreService scoreService,
             IValidatorResolver validatorResolver,
-            IMapper mapper
+            IMapper mapper,
+            ICacheService cacheService,
+            ICountryService countryService
             )
         {
             _logger = logger;
@@ -39,20 +47,9 @@ namespace GoodJobGames.Controllers
             _scoreService = scoreService;
             _validatorResolver = validatorResolver;
             _mapper = mapper;
+            _cacheService = cacheService;
+            _countryService = countryService;
         }
-
-        #region Authorization
-
-        [AllowAnonymous]
-        [HttpPost("authenticate")]
-        public async Task<UserResponse> Authenticate([FromBody]LoginRequest userRequest)
-        {
-                var user = await _userService.Authenticate(userRequest.Username, userRequest.Password);
-
-                return _mapper.Map<UserResponse>(user);
-        }
-
-        #endregion
 
         #region User
 
@@ -72,42 +69,41 @@ namespace GoodJobGames.Controllers
                 throw new ValidationException(validationResult.ToString());
             }
 
-            var user = _mapper.Map<User>(userRequest);
-
-            var userResponse = _userService.CreateUser(user);
-
-            var userResponseModel = _mapper.Map<UserResponse>(userResponse.Result);
-            userResponseModel.Score = 0;
-            //TODO: GET RANK
-
-
-            return userResponseModel;
-        }
-
-        /// <summary>
-        /// Updates  user
-        /// </summary>
-        /// <param name="userRequest"></param>
-        /// <returns></returns>
-        [HttpPut("")]
-        public async Task<UserResponse> UpdateUser([FromBody] UserRequest userRequest)
-        {
-            /* VALIDATE */
-            var validator = _validatorResolver.Resolve<UserRequestValidator>();
-            ValidationResult validationResult = validator.Validate(userRequest);
-            if (!validationResult.IsValid)
+            try
             {
-                throw new ValidationException(validationResult.ToString());
+                var user = _mapper.Map<User>(userRequest);
+                var country = await _countryService.GetCountryByIsoCode(userRequest.CountryIsoCode);
+                if (country != null)
+                    user.CountryId = country.Id;
+
+                var userResponse = await _userService.CreateUser(user);
+                if (userResponse != null)
+                {
+                    //After Insert
+                    await _scoreService.SubmitScore(new Score()
+                    {
+                        UserId = userResponse.GID,
+                        UserScore = 0
+                    });
+
+                    var userResponseModel = _mapper.Map<UserResponse>(userResponse);
+                    userResponseModel.Score = 0;
+                    
+                    //On Score Change
+                    string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{country.CountryIsoCode}";
+                    _cacheService.SortedSetAdd(key, userResponseModel.Score, userResponseModel);
+                    var rank = _cacheService.SortedSetGetRank(key, userResponseModel);
+                    userResponseModel.Rank = rank;
+                    return userResponseModel;
+                }
+                return null; //TODO: Good message
             }
-
-            var user = _mapper.Map<User>(userRequest);
-
-            var userResponse = _userService.UpdateUser(user);
-
-            var userResponseModel = _mapper.Map<UserResponse>(userResponse.Result);
-
-            return userResponseModel;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
+
 
         /// <summary>
         /// Gets  user
@@ -120,9 +116,11 @@ namespace GoodJobGames.Controllers
             if (userId == null)
                 throw new NotFoundException("User can not be found");
 
-            var user = _userService.GetUserByGuid(userId);
+            var user = await _userService.GetUserByGuid(userId);
+            var userResponseModel = _mapper.Map<UserResponse>(user);
 
-            var userResponseModel = _mapper.Map<UserResponse>(user.Result);
+            string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
+            userResponseModel.Rank = _cacheService.SortedSetGetRank(key, userResponseModel);
 
             return userResponseModel;
         }

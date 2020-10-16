@@ -13,7 +13,6 @@ namespace GoodJobGames.Business.Validators
         public ScoreRequestValidator()
         {
             RuleFor(r => r.UserId).NotNull();
-            RuleFor(r => r.UserScore).NotNull();
         }
     }
 }

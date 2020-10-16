@@ -13,15 +13,18 @@ namespace GoodJobGames.Business.Services.Implementation
     public class ScoreService : IScoreService
     {
         private readonly DataContext _dataContext;
+        private readonly ICacheService _cacheService;
 
 
-        public ScoreService(DataContext dataContext)
+        public ScoreService(DataContext dataContext, ICacheService cacheService)
         {
             _dataContext = dataContext;
+            _cacheService = cacheService;
         }
 
         public async Task SubmitScore(Score score)
         {
+
             //TODO: ID maybe problem for updating score
             var foundScore = GetScoreByUserId(score.UserId);
             if (foundScore == null)

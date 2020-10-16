@@ -14,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Reflection.Metadata;
+using GoodJobGames.Utilities.Constants;
 
 namespace GoodJobGames.Controllers
 {
@@ -24,18 +26,24 @@ namespace GoodJobGames.Controllers
         private readonly ILogger<ScoreApiController> _logger;
         private readonly IValidatorResolver _validatorResolver;
         private readonly IScoreService _scoreService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
         public ScoreApiController(ILogger<ScoreApiController> logger,
             IValidatorResolver validatorResolver,
             IMapper mapper,
-            IScoreService scoreService
+            IScoreService scoreService,
+            ICacheService cacheService,
+            IUserService userService
             )
         {
             _logger = logger;
             _validatorResolver = validatorResolver;
             _mapper = mapper;
             _scoreService = scoreService;
+            _userService = userService;
+            _cacheService = cacheService;
         }
 
         [HttpPost("submit")]
@@ -49,11 +57,32 @@ namespace GoodJobGames.Controllers
                 throw new ValidationException(validationResult.ToString());
             }
 
+            ScoreResponse scoreResponse = new ScoreResponse();
+            var user = await _userService.GetUserByGuid(scoreRequest.UserId);
+            var userResponseModel = _mapper.Map<UserResponse>(user);
+            
+
             var score = _mapper.Map<Score>(scoreRequest);
             await _scoreService.SubmitScore(score);
 
-            var response = _scoreService.GetScoreByUserId(scoreRequest.UserId);
-            return _mapper.Map<ScoreResponse>(response);
+            scoreResponse.UserId = user.GID;
+            scoreResponse.Timestamp = DateTime.Now;
+            scoreResponse.Score = user.Score.UserScore + score.UserScore;
+
+            string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
+            var rank = _cacheService.SortedSetGetRank(key, userResponseModel);
+            if (rank == -1)
+            {
+                //Add to cache
+                _cacheService.SortedSetAdd(key, userResponseModel.Score, userResponseModel);
+            }
+            else
+            {
+                //Increment cache
+                _cacheService.SortedSetIncrement(key, userResponseModel.Score, userResponseModel);
+            }
+
+            return scoreResponse;
         }
     }
 }

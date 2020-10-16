@@ -1,21 +1,14 @@
 ﻿using AutoMapper;
-using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using GoodJobGames.Business.Validators;
 using GoodJobGames.Data;
 using GoodJobGames.Data.EntityModels;
-using GoodJobGames.Models.Requests;
-using GoodJobGames.Models.Responses;
 using GoodJobGames.Utilities.Constants;
 using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using GoodJobGames.Models.CustomExceptions;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -41,57 +34,20 @@ namespace GoodJobGames.Business.Services.Implementation
             _scoreService = scoreService;
         }
 
-        public async Task<User> Authenticate(string username, string password)
-        {
-            var user = _dataContext.Users.Where(x => x.Username == username && x.Password == password).First();
-
-            // Kullanici bulunamadıysa null döner.
-            if (user == null)
-                return null;
-
-            // Authentication(Yetkilendirme) başarılı ise JWT token üretilir.
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(AppConstants.JWTSecretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            user.Token = tokenHandler.WriteToken(token);
-
-            // Sifre null olarak gonderilir.
-            user.Password = null;
-            
-            return user;
-        }
-
         #region User CRUD
-        public async Task<User> CreateUser(User userRequest)
+        public async Task<User> CreateUser(User user)
         {
             var updateDate = DateTime.Now;
-
-            userRequest.CreatedOnUtc = updateDate;
-            userRequest.UpdatedOnUtc = updateDate;
-            userRequest.IsDeleted = false;
-            userRequest.GID = Guid.NewGuid();
-
+            user.CreatedOnUtc = updateDate;
+            user.UpdatedOnUtc = updateDate;
+            user.IsDeleted = false;
+            user.IsActive = true;
+            user.GID = Guid.NewGuid();
             
-            var user = _dataContext.Users.Add(userRequest);
-
-            await _scoreService.SubmitScore(new Score()
-            {
-                UserId = userRequest.GID,
-                UserScore = 0
-            });
-
+            var newUser =  _dataContext.Users.Add(user);
             await _dataContext.SaveChangesAsync();
 
-            return user.Entity;
+            return newUser.Entity;
         }
 
         public async Task<User> GetUserById(int userId)

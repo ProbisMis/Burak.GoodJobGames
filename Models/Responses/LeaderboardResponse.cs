@@ -11,5 +11,6 @@ namespace GoodJobGames.Models.Responses
         public Guid UserId { get; set; }
         public int Rank { get; set; }
         public string CountryName { get; set; }
+        public string Key { get; set; }
     }
 }

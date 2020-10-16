@@ -15,16 +15,10 @@ using GoodJobGames.Utilities.ConfigModels;
 using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using Microsoft.EntityFrameworkCore;
 using GoodJobGames.Business.Services.Implementation;
-using GoodJobGames.Utilities.Constants;
-using System.Text;
 using GoodJobGames.Business.Services.Interface;
 using GoodJobGames.Utilities.Configurations.Startup;
 using GoodJobGames.Utilities.Filters;
 using GoodJobGames.Utilities.Helper;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using StackExchange.Redis;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Http;
 
 namespace GoodJobGames
@@ -48,44 +42,11 @@ namespace GoodJobGames
             services.AddMvc(options => options.Filters.Add<GeneralExceptionFilter>());
             services.AddMvc(options => options.EnableEndpointRouting = true);
 
-            //var csredis = new CSRedis.CSRedisClient("mymaster,password=123,prefix=my_",
-            //    new[] { "127.0.0.1:26379", "192.169.1.11:26379", "192.169.1.12:26379" });
-            //RedisHelper.Initialization(csredis);
-            //services.AddSingleton<IDistributedCache>(new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
-            var csredis = new CSRedis.CSRedisClient("rgjg-edis-2.81gayg.ng.0001.euc1.cache.amazonaws.com:6379");
-            RedisHelper.Initialization(csredis);
-            services.AddSingleton<IDistributedCache>(new Microsoft.Extensions.Caching.Redis.CSRedisCache(RedisHelper.Instance));
-            //ConnectionMultiplexer.Connect("gjgredis.81gayg.ng.0001.euc1.cache.amazonaws.com:6379");
-            //services.AddDistributedRedisCache(option =>
-            //{
-            //    option.Configuration = "127.0.0.1:6379";
-            //    option.InstanceName = "master";
-            //});
-
             AddSelectedDataStorage(services);
             AddMappers(services);
             AddValidations(services);
             AddBusinessServices(services);
-
-            //// JWT authentication Aayarlaması
-            //var key = Encoding.ASCII.GetBytes(AppConstants.JWTSecretKey);
-            //services.AddAuthentication(x =>
-            //{
-            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //.AddJwtBearer(x =>
-            //{
-            //    x.RequireHttpsMetadata = false;
-            //    x.SaveToken = true;
-            //    x.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(key),
-            //        ValidateIssuer = false,
-            //        ValidateAudience = false
-            //    };
-            //});
+            AddCacheServices(services);
 
             services.AddSwaggerGen(c =>
             c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "Game API", Version = "v1" }));
@@ -111,7 +72,7 @@ namespace GoodJobGames
 
             app.UseRouting();
 
-            //app.UseAuthorization();
+            //app.UseAuthorizatioN();
 
             app.UseEndpoints(endpoints =>
             {
@@ -160,6 +121,14 @@ namespace GoodJobGames
             //TODO: Add Services (external,internal)
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IScoreService, ScoreService>();
+            services.AddScoped<ICountryService, CountryService>();
+        }
+
+        private void AddCacheServices(IServiceCollection services)
+        {
+            //TODO: Add Services (external,internal)
+            services.AddSingleton<RedisServer>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
         }
     }
 }
