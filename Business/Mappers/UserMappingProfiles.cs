@@ -16,7 +16,7 @@ namespace GoodJobGames.Business.Mappers
             //    .ForMember(x => x.Slot, opt => opt.Ignore());
             base.CreateMap<UserRequest, User>().ReverseMap();
             base.CreateMap<UserResponse, User>().ReverseMap().ForMember(destination => destination.Score,
-               opts => opts.MapFrom(source => source.Score.UserScore));
+               opts => opts.MapFrom(source => source.Score.Score));
 
             base.CreateMap<UserResponse, ScoreRequest>().ReverseMap();
 

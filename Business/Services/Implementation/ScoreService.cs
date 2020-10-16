@@ -13,16 +13,14 @@ namespace GoodJobGames.Business.Services.Implementation
     public class ScoreService : IScoreService
     {
         private readonly DataContext _dataContext;
-        private readonly ICacheService _cacheService;
 
-
-        public ScoreService(DataContext dataContext, ICacheService cacheService)
+        public ScoreService(DataContext dataContext
+            )
         {
             _dataContext = dataContext;
-            _cacheService = cacheService;
         }
 
-        public async Task SubmitScore(Score score)
+        public async Task SubmitScore(UserScore score)
         {
 
             //TODO: ID maybe problem for updating score
@@ -33,14 +31,14 @@ namespace GoodJobGames.Business.Services.Implementation
             }
             else
             {
-                foundScore.UserScore += score.UserScore;
+                foundScore.Score += score.Score;
                 _dataContext.Scores.Update(foundScore);
             }
            
             await _dataContext.SaveChangesAsync();
         }
 
-        private bool isExist(Score score)
+        private bool isExist(UserScore score)
         {
             var result = _dataContext.Scores.FirstOrDefault(x => x.UserId == score.UserId);
             if (result == null)
@@ -48,7 +46,7 @@ namespace GoodJobGames.Business.Services.Implementation
             return true;
         }
 
-        public Score GetScoreByUserId(Guid userId)
+        public UserScore GetScoreByUserId(Guid userId)
         {
             var result = _dataContext.Scores.FirstOrDefault(x => x.UserId == userId);
             return result;

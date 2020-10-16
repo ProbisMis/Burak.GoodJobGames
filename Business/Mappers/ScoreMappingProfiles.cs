@@ -9,8 +9,8 @@ namespace GoodJobGames.Business.Mappers
     {
         public ScoreMappingProfiles()
         {
-            base.CreateMap<ScoreRequest, Score>().ReverseMap();
-            base.CreateMap<ScoreResponse, Score>().ReverseMap();
+            base.CreateMap<ScoreRequest, UserScore>().ReverseMap();
+            base.CreateMap<ScoreResponse, UserScore>().ReverseMap();
         }
     }
 }

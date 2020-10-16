@@ -11,13 +11,15 @@ namespace GoodJobGames.Business.Services.Implementation
     public class CountryService : ICountryService
     {
         private readonly DataContext _dataContext;
-        private readonly ICacheService _cacheService;
+        //private readonly ICacheService _cacheService;
 
 
-        public CountryService(DataContext dataContext, ICacheService cacheService)
+        public CountryService(DataContext dataContext
+            //ICacheService cacheService
+            )
         {
             _dataContext = dataContext;
-            _cacheService = cacheService;
+            //_cacheService = cacheService;
         }
 
         public async Task<Country> GetCountry(int countryId)

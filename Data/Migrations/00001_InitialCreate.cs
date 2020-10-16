@@ -41,15 +41,15 @@ namespace GoodJobGames.Data.Migrations
             Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-5" , Password = "123456", CountryId = 2 });
 
 
-            Create.Table(nameof(Score))
+            Create.Table(nameof(UserScore))
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
                 .WithColumn("UserId").AsGuid().ForeignKey(nameof(User), "GID")
-                .WithColumn("UserScore").AsInt32();
+                .WithColumn("Score").AsInt32();
 
             ////Seed
-            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 1, CountryId = 1 , UserScore = 100});
-            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 2, CountryId = 1 , UserScore = 200});
-            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 3, CountryId = 1 , UserScore = 300});
+            //Insert.IntoTable(nameof(Score)).Row(new { Id = 1, CountryId = 1, UserScore = 100 });
+            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 2, CountryId = 1, UserScore = 200 });
+            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 3, CountryId = 1, UserScore = 300 });
 
 
 
@@ -60,7 +60,7 @@ namespace GoodJobGames.Data.Migrations
             Delete.Table(nameof(User));
             Delete.Table(nameof(Country));
 
-            Delete.Table(nameof(Score));
+            Delete.Table(nameof(UserScore));
         }
     }
 }

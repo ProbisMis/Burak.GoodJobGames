@@ -19,18 +19,12 @@ namespace GoodJobGames.Business.Services.Implementation
     public class UserService : IUserService
     {
         private readonly DataContext _dataContext;
-        private readonly IValidatorResolver _validatorResolver;
         private readonly IScoreService _scoreService;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<UserService> _logger;
 
-        public UserService(DataContext dataContext, IMapper mapper, IScoreService scoreService,
-             IValidatorResolver validatorResolver, IConfiguration configuration, ILogger<UserService> logger)
+        public UserService(DataContext dataContext, IMapper mapper, IScoreService scoreService
+              )
         {
             _dataContext = dataContext;
-            _validatorResolver = validatorResolver;
-            _configuration = configuration;
-            _logger = logger;
             _scoreService = scoreService;
         }
 
@@ -58,7 +52,7 @@ namespace GoodJobGames.Business.Services.Implementation
 
         public async Task<User> GetUserByGuid(Guid userGuid)
         {
-            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Include(x=>x.Country).Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
             return user;
         }
 

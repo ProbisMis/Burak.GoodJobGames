@@ -9,7 +9,7 @@ namespace GoodJobGames.Data.EntityModels
     public class Country : IEntity<int>
     {
         public int Id { get; set; }
-        public int CountryName { get; set; }
+        public string CountryName { get; set; }
         public string CountryIsoCode { get; set; }
         
         public User User { get; set; }

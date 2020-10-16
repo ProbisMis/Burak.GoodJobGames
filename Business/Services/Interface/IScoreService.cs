@@ -8,7 +8,7 @@ namespace GoodJobGames.Business.Services.Interface
 {
     public interface IScoreService
     {
-        Task SubmitScore(Score score);
-        Score GetScoreByUserId(Guid userId);
+        Task SubmitScore(UserScore score);
+        UserScore GetScoreByUserId(Guid userId);
     }
 }
