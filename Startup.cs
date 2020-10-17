@@ -20,6 +20,7 @@ using GoodJobGames.Utilities.Configurations.Startup;
 using GoodJobGames.Utilities.Filters;
 using GoodJobGames.Utilities.Helper;
 using Microsoft.AspNetCore.Http;
+using NLog.Extensions.Logging;
 
 namespace GoodJobGames
 {
@@ -37,7 +38,7 @@ namespace GoodJobGames
         {
             services.AddControllers();
 
-            //services.AddLogging(builder => builder.AddNLog());
+            services.AddLogging(builder => builder.AddNLog());
             services.AddOptionsConfiguration(Configuration);
             services.AddMvc(options => options.Filters.Add<GeneralExceptionFilter>());
             services.AddMvc(options => options.EnableEndpointRouting = true);
@@ -94,7 +95,7 @@ namespace GoodJobGames
                     services.AddDbContext<DataContext>(builder => builder.UseSqlServer(dataStorage.ConnectionString));
                     break;
                 case DataStorageTypes.RDS:
-                    services.AddDbContext<DataContext>(builder => builder.UseSqlServer(dataStorage.ConnectionString));
+                    services.AddDbContext<DataContext>(builder => builder.UseMySql(dataStorage.ConnectionString));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"{dataStorage.DataStorageType} has not been pre-defined");
@@ -114,6 +115,8 @@ namespace GoodJobGames
             services.AddSingleton<IValidatorResolver, ValidatorResolver>();
             services.AddSingleton<IValidator, UserRequestValidator>();
             services.AddSingleton<IValidator, ScoreRequestValidator>();
+            services.AddSingleton<IValidator, LeaderboardRequestValidator>();
+            services.AddSingleton<IValidator, BulkImportUserRequestValidator>();
         }
 
         private void AddBusinessServices(IServiceCollection services)

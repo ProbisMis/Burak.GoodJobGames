@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using GoodJobGames.Data;
 using GoodJobGames.Utilities.Constants;
 using GoodJobGames.Utilities.Helper;
+using NLog.Web;
+using NLog;
 
 namespace GoodJobGames
 {
@@ -16,7 +18,7 @@ namespace GoodJobGames
 
         public static void Main(string[] args)
         {
-            //Logger logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            Logger logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
 
             try
             {
@@ -24,23 +26,23 @@ namespace GoodJobGames
                                             .AddJsonFile(appSettingsFile, optional: false)
                                             .Build();
 
-                //logger.Info($"{AppConstants.SolutionName}.Api trigger migration");
+                logger.Info($"{AppConstants.SolutionName}.Api trigger migration");
                 RunMigration(config);
 
-                //logger.Info($"{AppConstants.SolutionName}.Api is starting");
+                logger.Info($"{AppConstants.SolutionName}.Api is starting");
                 var webHost = BuildWebHost(args, config);
 
                 webHost.Run();
             }
             catch (Exception ex)
             {
-            //    logger.Info($"{AppConstants.SolutionName}.Api is caught exception {ex}");
-            //    logger.Fatal(ex);
+                logger.Info($"{AppConstants.SolutionName}.Api is caught exception {ex}");
+                logger.Fatal(ex);
             }
             finally
             {
-                //logger.Info($"{AppConstants.SolutionName}.Api is shutting down");
-                //LogManager.Shutdown();
+                logger.Info($"{AppConstants.SolutionName}.Api is shutting down");
+                LogManager.Shutdown();
             }
         }
 
@@ -67,7 +69,7 @@ namespace GoodJobGames
                                     .AddJsonFile(appSettingsFile, false);
                           })
                           .UseUrls(urls)
-                          //.UseNLog()
+                          .UseNLog()
                           .Build();
         }
     }
