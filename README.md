@@ -9,6 +9,8 @@
 for Redis i used AWS Elasticache, that should be in same VPC with EC2 instance and with all tcp ports open. 
 * Elasticache nginx config file is located in .platform file, which is needed for reverse proxy port setting. My application runs on port 5001, this can be changed but .platform/nginx/nginx.conf file should be changed as well.
 
+* I can create an IAM if you want to take a look to infrastructure.
+
 ### Include ###
 
 * [NLog] for logging 
