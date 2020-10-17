@@ -16,6 +16,10 @@ using Microsoft.Extensions.Logging;
 using ValidationException = FluentValidation.ValidationException;
 using GoodJobGames.Models;
 using GoodJobGames.Utilities.Constants;
+using GoodJobGames.Models.CacheModel;
+using GoodJobGames.Models.Requests.Import;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GoodJobGames.Controllers
 {
@@ -23,8 +27,6 @@ namespace GoodJobGames.Controllers
     [Route("user")]
     public class UserApiController : ControllerBase
     {
-        
-
         private readonly ILogger<UserApiController> _logger;
         private readonly IUserService _userService;
         private readonly IScoreService _scoreService;
@@ -79,31 +81,25 @@ namespace GoodJobGames.Controllers
                 var userResponse = await _userService.CreateUser(user);
                 if (userResponse != null)
                 {
-                    //After Insert
-                    await _scoreService.SubmitScore(new Score()
-                    {
-                        UserId = userResponse.GID,
-                        UserScore = 0
-                    });
-
+                    await generateScoreForNewUser(userResponse.GID);
                     var userResponseModel = _mapper.Map<UserResponse>(userResponse);
-                    userResponseModel.Score = 0;
-                    
-                    //On Score Change
-                    string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{country.CountryIsoCode}";
-                    _cacheService.SortedSetAdd(key, userResponseModel.Score, userResponseModel);
-                    var rank = _cacheService.SortedSetGetRank(key, userResponseModel);
-                    userResponseModel.Rank = rank;
+
+                    _cacheService.HashSet(new UserCacheModel
+                    {
+                        GID = userResponseModel.GID,
+                        Username = userResponseModel.Username,
+                        CountryIsoCode = userResponseModel.CountryIsoCode
+                    });
+                    userResponseModel.Rank = await addToCacheAndGetRank(userResponse.GID, country.CountryIsoCode); //Adds score info to sortedset
                     return userResponseModel;
                 }
-                return null; //TODO: Good message
+                return null; 
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-
 
         /// <summary>
         /// Gets  user
@@ -116,14 +112,118 @@ namespace GoodJobGames.Controllers
             if (userId == null)
                 throw new NotFoundException("User can not be found");
 
-            var user = await _userService.GetUserByGuid(userId);
-            var userResponseModel = _mapper.Map<UserResponse>(user);
+            UserResponse userResponse = new UserResponse();
+            if (await _cacheService.IsHashExist(userId))
+            {
+                var cachedUser = await _cacheService.HashGetAll(userId);
+                userResponse.GID = userId;
+                userResponse.Username = await _cacheService.HashGet(new UserCacheModel
+                {
+                    GID = userId
+                }, 
+                "Username");
+                userResponse.CountryIsoCode = cachedUser.GetValueOrDefault("CountryIsoCode");
+            }
+            else
+            {
+                var user = await _userService.GetUserByGuid(userId);
+                userResponse = _mapper.Map<UserResponse>(user);
 
-            string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
-            userResponseModel.Rank = _cacheService.SortedSetGetRank(key, userResponseModel);
+                _cacheService.HashSet(new UserCacheModel
+                {
+                    GID = userResponse.GID,
+                    Username = userResponse.Username,
+                    CountryIsoCode = userResponse.CountryIsoCode
+                });
+            }
 
-            return userResponseModel;
+            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel
+            {
+                Id = userId
+            };
+            string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{userResponse.CountryIsoCode}";
+            userResponse.Rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            userResponse.Score = await _cacheService.SortedSetGetScore(key, cacheModel);
+
+            return userResponse;
         }
         #endregion
-    } 
+
+        #region Bulk Import
+
+        /// <summary>
+        /// Creates user
+        /// </summary>
+        /// <param name="userRequest"></param>
+        /// <returns></returns>
+        [HttpPost("BulkImportUser")]
+        public async Task BulkImportUser([FromBody] BulkImportUserRequest request)
+        {
+            /* VALIDATE */
+            var validator = _validatorResolver.Resolve<BulkImportUserRequestValidator>();
+            ValidationResult validationResult = validator.Validate(request);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.ToString());
+            }
+
+            try
+            {
+                Random rnd = new Random();
+                var countryList = await _countryService.GetAllCountry();
+                List<User> userList = new List<User>();
+                for (int i = 1; i <= request.NumberOfUsers; i++)
+                {   
+                    var user = await _userService.CreateUser(generateUserDTO(request.UsernamePrefix, request.FixedPassword, rnd.Next(1, countryList.Count), i));
+                    await addToCacheAndGetRank(user.GID, user.Country.CountryIsoCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        private User generateUserDTO(string namePrefix, string fixedPassword, int countryId, int counter)
+        {
+            return new User
+            {
+                CountryId = countryId,
+                IsActive = true,
+                IsDeleted = false,
+                UpdatedOnUtc = DateTime.Now,
+                CreatedOnUtc = DateTime.Now,
+                Password = fixedPassword != null ? fixedPassword : "123456",
+                Username = $"{namePrefix}-{counter}",
+                Score = new UserScore {
+                    Score = 0
+                }
+            };
+        }
+
+        private async Task generateScoreForNewUser(Guid guid)
+        {
+            //After Insert Trigger?
+            await _scoreService.SubmitScore(new UserScore()
+            {
+                UserId = guid,
+                Score = 0
+            });
+        }
+
+        private async Task<int> addToCacheAndGetRank(Guid guid, string countryIsoCode)
+        {
+            //On Score Change
+            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel
+            {
+                Id = guid
+            };
+            string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryIsoCode}";
+            await _cacheService.SortedSetAdd(key, 0, cacheModel);
+            var rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            return rank;
+        }
+        #endregion
+    }
 }

@@ -1,18 +1,12 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using GoodJobGames.Data;
 using GoodJobGames.Data.EntityModels;
-using GoodJobGames.Utilities.Constants;
-using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using GoodJobGames.Business.Services.Interface;
+using System.Collections.Generic;
 
 namespace GoodJobGames.Business.Services.Implementation
 {
@@ -42,6 +36,12 @@ namespace GoodJobGames.Business.Services.Implementation
             await _dataContext.SaveChangesAsync();
 
             return newUser.Entity;
+        }
+
+        public async Task CreateUserRange(List<User> user)
+        {
+            _dataContext.Users.AddRange(user);
+            await _dataContext.SaveChangesAsync();
         }
 
         public async Task<User> GetUserById(int userId)

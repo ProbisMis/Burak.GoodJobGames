@@ -7,7 +7,7 @@ namespace GoodJobGames.Data.EntityModels
     /// <summary>
     /// User Migration DB Entity class
     /// </summary>
-    public class User : IEntity<int>, ISoftDelete
+    public class User : IEntity<int>
     {
         public int Id { get; set; }
         public Guid GID { get; set; }

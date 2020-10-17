@@ -24,7 +24,7 @@ namespace GoodJobGames.Utilities.Helper
             List<T> response = new List<T>();
             foreach (var item in value)
             {
-                response.Add((T)Convert.ChangeType(value.ToString(), typeof(T)));
+                response.Add((T)Convert.ChangeType(item.ToString(), typeof(T)));
             }
             return response;
         }

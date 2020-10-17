@@ -34,11 +34,11 @@ namespace GoodJobGames.Data.Migrations
                 .WithColumn("Token").AsString().Nullable();
 
             //Seed
-            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-1" , Password = "123456", CountryId = 1});
-            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-2" , Password = "123456", CountryId = 1 });
-            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-3" , Password = "123456", CountryId = 1 });
-            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-4" , Password = "123456", CountryId = 2 });
-            Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-5" , Password = "123456", CountryId = 2 });
+            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-1" , Password = "123456", CountryId = 1});
+            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-2" , Password = "123456", CountryId = 1 });
+            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-3" , Password = "123456", CountryId = 1 });
+            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-4" , Password = "123456", CountryId = 2 });
+            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-5" , Password = "123456", CountryId = 2 });
 
 
             Create.Table(nameof(UserScore))

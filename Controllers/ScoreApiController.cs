@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection.Metadata;
 using GoodJobGames.Utilities.Constants;
+using GoodJobGames.Models.CacheModel;
 
 namespace GoodJobGames.Controllers
 {
@@ -62,24 +63,26 @@ namespace GoodJobGames.Controllers
             var userResponseModel = _mapper.Map<UserResponse>(user);
             
 
-            var score = _mapper.Map<Score>(scoreRequest);
+            var score = _mapper.Map<UserScore>(scoreRequest);
             await _scoreService.SubmitScore(score);
 
             scoreResponse.UserId = user.GID;
             scoreResponse.Timestamp = DateTime.Now;
-            scoreResponse.Score = user.Score.UserScore + score.UserScore;
-
+            scoreResponse.Score = user.Score.Score;
+            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel{
+                Id = scoreRequest.UserId
+            };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
-            var rank = _cacheService.SortedSetGetRank(key, userResponseModel);
+            var rank = await  _cacheService.SortedSetGetRank(key, cacheModel);
             if (rank == -1)
             {
                 //Add to cache
-                _cacheService.SortedSetAdd(key, userResponseModel.Score, userResponseModel);
+                await _cacheService.SortedSetAdd(key, userResponseModel.Score, cacheModel);
             }
             else
             {
                 //Increment cache
-                _cacheService.SortedSetIncrement(key, userResponseModel.Score, userResponseModel);
+                await _cacheService.SortedSetIncrement(key, userResponseModel.Score, cacheModel);
             }
 
             return scoreResponse;

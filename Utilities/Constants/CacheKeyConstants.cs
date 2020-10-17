@@ -10,5 +10,7 @@ namespace GoodJobGames.Utilities.Constants
         public static string LEADERBOARD_KEY = "leaderboard";
         public static string ALL_LEADERBOARD_TEMP_KEY = "leaderboard.temp";
         public static string ALL_LEADERBOARD_KEY = "leaderboard.all";
+
+        public static string USER_KEY = "user";
     }
 }
