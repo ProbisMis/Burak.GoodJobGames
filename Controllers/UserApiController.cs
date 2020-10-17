@@ -20,6 +20,8 @@ using GoodJobGames.Models.CacheModel;
 using GoodJobGames.Models.Requests.Import;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Renci.SshNet.Messages;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace GoodJobGames.Controllers
 {
@@ -142,7 +144,10 @@ namespace GoodJobGames.Controllers
                 Id = userId
             };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{userResponse.CountryIsoCode}";
-            userResponse.Rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            var rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            if (rank == -1)
+                await _cacheService.SortedSetAdd(key, 0, cacheModel);
+            userResponse.Rank = await _cacheService.SortedSetGetRank(key, cacheModel); 
             userResponse.Score = await _cacheService.SortedSetGetScore(key, cacheModel);
 
             return userResponse;
@@ -173,10 +178,16 @@ namespace GoodJobGames.Controllers
                 var countryList = await _countryService.GetAllCountry();
                 List<User> userList = new List<User>();
                 for (int i = 1; i <= request.NumberOfUsers; i++)
-                {   
-                    var user = await _userService.CreateUser(generateUserDTO(request.UsernamePrefix, request.FixedPassword, rnd.Next(1, countryList.Count), i));
-                    await addToCacheAndGetRank(user.GID, user.Country.CountryIsoCode);
+                {
+                    userList.Add(generateUserDTO(request.UsernamePrefix, request.FixedPassword, rnd.Next(1, countryList.Count), i));
+                    if (i % 100 == 0)
+                    {
+                        await _userService.CreateUserRange(userList);
+                        userList.Clear();
+                    }
                 }
+                if (userList.Count > 0)
+                    await _userService.CreateUserRange(userList);
             }
             catch (Exception ex)
             {
@@ -189,6 +200,7 @@ namespace GoodJobGames.Controllers
         {
             return new User
             {
+                GID = Guid.NewGuid(),
                 CountryId = countryId,
                 IsActive = true,
                 IsDeleted = false,
@@ -196,9 +208,6 @@ namespace GoodJobGames.Controllers
                 CreatedOnUtc = DateTime.Now,
                 Password = fixedPassword != null ? fixedPassword : "123456",
                 Username = $"{namePrefix}-{counter}",
-                Score = new UserScore {
-                    Score = 0
-                }
             };
         }
 

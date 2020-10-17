@@ -59,7 +59,7 @@ namespace GoodJobGames.Business.Services.Implementation
             var x = await _redisServer.Database.SortedSetRankAsync(key, JsonConvert.SerializeObject(data), Order.Descending);
             if (x.HasValue)
             {
-                return Convert.ToInt32(x.Value);
+                return Convert.ToInt32(x.Value) + 1;
             }
             return -1;
         }

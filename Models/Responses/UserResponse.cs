@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GoodJobGames.Models.Responses
 {
-    public class UserResponse 
+    public class UserResponse  : ServiceAdaptorException
     {
         public Guid GID { get; set; }
         public string Username { get; set; }
