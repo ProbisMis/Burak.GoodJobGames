@@ -1,4 +1,4 @@
-## .NET Core Simple Leaderboard with Redis and AWS Elasticbeanstalk ##
+## .NET Core 3.0 Simple Leaderboard with Redis and AWS Elasticbeanstalk ##
 
 ### Installation ###
 
@@ -28,62 +28,6 @@ for Redis i used AWS Elasticache, that should be in same VPC with EC2 instance a
 
 ### Notes ###
 
-
+The project was challenging and educatory. Designing a leaderboard that serves millions of users arises some problems. First of all, if the server can handle millions of request at a time? I used loadbalancer and autoscaling for distributing the load equally to servers as well as horizontally scaling number of instances if the current amount is not enough. Then, if the database can handle many operation? I tried to decrease the number of request going to server by caching the data into Redis. That decreased the amount of request is going to database. However, the redis server should have good amount of memory and it should be scaled as well. Thanks to AWS Elasticache service, scaling operations are handled easily by enabling cluster mode. Redis also helped me to achieve fast data search. Its SortedSet class is a perfect fit for leaderboard, automatically sorted after a insertion. Getting a rank of single user takes O(logn) time. Also, user information is stored in Redis Hash therefore there is no need to ask database. 
 
 Thanks.
-
-### Presentation ###
-API Routes List
-![routes](/images/routes1.png)
-
-#### GET Methods ####
-Replace port, user_id, friend_id
-
-GET All Friends, friend list.
-http://localhost:port/api/user/friends/user_id
-
-GET Chat is used for reading messages. Order of ID's matters in order to update read status. 
-http://localhost:port/api/chat/user_id/friend_id
-
-GET Get All Chats, doesnt update read status. It will get all open chats of user.
-http://localhost:port/api/chat/user_id
-
-#### POST Methods ####
-
-Register,Login can be used by filling Username and Password are in Postman. 
-```json
-{
-	"Username" :"TEST",
-	"Password" :"123"
-}
-```
-A sample response for login will return user data
-![user data](/images/loginresult.png)
-
-A sample response for login error
-![user data](/images/loginerror1.png)
-
-Add Friend, Block Friend, Start Chat are using below parameters.
-* user_id is sender, friend_id is reciever. 
-```json
-{
-	"user_id" :1,
-	"friend_id" :1002
-}
-```
-
-Send Message 
-```json
-{
-	"message_body" : "Hello 1!",
-	"user_id" :1002,
-	"friend_id" :1
-}
-```
-
-Send Message - swap users
-![Chat3](/images/message2.png)
-
-
-Get Message - If reciever recieves messages via GetChat function. Read status is updated. According to whose reading.
-![Chat4](/images/message3.png)
