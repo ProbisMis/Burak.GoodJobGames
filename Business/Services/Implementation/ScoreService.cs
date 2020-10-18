@@ -37,10 +37,22 @@ namespace GoodJobGames.Business.Services.Implementation
 
         public async Task<List<UserScore>> GetScores(int numberOfRecords)
         {
-
+           
             var scores = _dataContext.Scores.Include(x=> x.User.Country).OrderByDescending(x => x.Score).Take(numberOfRecords);
             return scores.ToList();
         }
+
+        public async Task<List<UserScore>> GetScoresByCountry(int numberOfRecords, int countryId)
+        {
+            var query =
+                from score in _dataContext.Scores
+                join user in _dataContext.Users on score.UserId equals user.GID
+                where user.CountryId == countryId
+                orderby score.Score descending
+                select score;
+            return query.Take(100).ToList();
+        }
+       
 
         public UserScore GetScoreByUserId(Guid userId)
         {

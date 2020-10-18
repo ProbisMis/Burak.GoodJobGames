@@ -5,18 +5,15 @@ using GoodJobGames.Data.EntityModels;
 using GoodJobGames.Models.Requests;
 using GoodJobGames.Models.Responses;
 using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
-using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Reflection.Metadata;
 using GoodJobGames.Utilities.Constants;
 using GoodJobGames.Models.CacheModel;
+using GoodJobGames.Models.CustomExceptions;
+using ValidationException = GoodJobGames.Models.CustomExceptions.ValidationException;
 
 namespace GoodJobGames.Controllers
 {
@@ -60,8 +57,7 @@ namespace GoodJobGames.Controllers
 
             ScoreResponse scoreResponse = new ScoreResponse();
             var user = await _userService.GetUserByGuid(scoreRequest.UserId);
-            var userResponseModel = _mapper.Map<UserResponse>(user);
-            
+            if (user == null) throw new NotFoundException(nameof(User));
 
             var score = _mapper.Map<UserScore>(scoreRequest);
             await _scoreService.SubmitScore(score);

@@ -31,6 +31,7 @@ namespace GoodJobGames.Utilities.Filters
             {
                 _logger.LogWarning(ex, $"TraceId: {traceId} - {basicErrorResponse.Message}", null);
                 httpStatusCode = HttpStatusCode.NotFound;
+                basicErrorResponse.Message += " can not be found";
             }
             else if (ex is ValidationException)
             {

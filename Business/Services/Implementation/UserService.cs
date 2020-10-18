@@ -25,11 +25,6 @@ namespace GoodJobGames.Business.Services.Implementation
         #region User CRUD
         public async Task<User> CreateUser(User user)
         {
-            var updateDate = DateTime.Now;
-            user.CreatedOnUtc = updateDate;
-            user.UpdatedOnUtc = updateDate;
-            user.IsDeleted = false;
-            user.IsActive = true;
             user.GID = Guid.NewGuid();
             
             var newUser =  _dataContext.Users.Add(user);
@@ -38,27 +33,32 @@ namespace GoodJobGames.Business.Services.Implementation
             return newUser.Entity;
         }
 
-        public async Task CreateUserRange(List<User> user)
+        public async Task CreateUserRange(List<User> users)
         {
-            _dataContext.Users.AddRange(user);
-            await _dataContext.SaveChangesAsync();
+                foreach (var user in users)
+                {
+                    _dataContext.Entry(user).State = EntityState.Added;
+                    _dataContext.Entry(user.CountryId).State = EntityState.Unchanged;
+                }
+                _dataContext.Users.AddRange(users);
+                _dataContext.SaveChanges();
         }
 
         public async Task<User> GetUserById(int userId)
         {
-            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.Id == userId && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Include(x => x.Country).Where(x => x.Id == userId && !x.IsDeleted && x.IsActive).FirstOrDefault();
             return user;
         }
 
         public async Task<User> GetUserByGuid(Guid userGuid)
         {
-            var user = _dataContext.Users.Include(x => x.Score).Include(x=>x.Country).Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Include(x=>x.Country).Where(x => x.GID == userGuid && !x.IsDeleted && x.IsActive).FirstOrDefault();
             return user;
         }
 
         public async Task<User> GetUserByUsername(string username)
         {
-            var user = _dataContext.Users.Include(x => x.Score).Where(x => x.Username == username && !x.IsDeleted && x.IsActive).First();
+            var user = _dataContext.Users.Include(x => x.Score).Include(x => x.Country).Where(x => x.Username == username && !x.IsDeleted && x.IsActive).FirstOrDefault();
             return user;
         }
 

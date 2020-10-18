@@ -11,5 +11,6 @@ namespace GoodJobGames.Business.Services.Interface
         Task<Country> GetCountry(int countryId);
         Task<List<Country>> GetAllCountry();
         Task<Country> GetCountryByIsoCode(string countryId);
+        Task<Country> AddCountry(string countryIsoCode);
     }
 }

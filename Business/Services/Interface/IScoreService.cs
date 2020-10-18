@@ -11,5 +11,6 @@ namespace GoodJobGames.Business.Services.Interface
         Task SubmitScore(UserScore score);
         UserScore GetScoreByUserId(Guid userId);
         Task<List<UserScore>> GetScores(int numberOfRecords);
+        Task<List<UserScore>> GetScoresByCountry(int numberOfRecords, int countryId);
     }
 }

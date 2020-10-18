@@ -31,5 +31,17 @@ namespace GoodJobGames.Business.Services.Implementation
         {
             return _dataContext.Countries.FirstOrDefault(x => x.CountryIsoCode == countryIsoCode);
         }
+
+        public async Task<Country> AddCountry(string countryIsoCode)
+        {
+            var country =_dataContext.Countries.Add(new Country
+            {
+                CountryIsoCode = countryIsoCode,
+                CountryName = countryIsoCode,
+                User = null
+            });
+            await _dataContext.SaveChangesAsync();
+            return country.Entity;
+        }
     }
 }

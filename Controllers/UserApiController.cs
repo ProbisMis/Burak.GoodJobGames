@@ -78,13 +78,18 @@ namespace GoodJobGames.Controllers
                 var user = _mapper.Map<User>(userRequest);
                 var country = await _countryService.GetCountryByIsoCode(userRequest.CountryIsoCode);
                 if (country == null)
-                    throw new NotFoundException(nameof(Country));
+                    country = await _countryService.AddCountry(userRequest.CountryIsoCode);
                 user.CountryId = country.Id;
 
                 var userResponse = await _userService.CreateUser(user);
                 if (userResponse != null)
                 {
-                    await generateScoreForNewUser(userResponse.GID);
+                    await _scoreService.SubmitScore(new UserScore()
+                    {
+                        UserId = user.GID,
+                        Score = 0
+                    });
+
                     var userResponseModel = _mapper.Map<UserResponse>(userResponse);
 
                     _cacheService.HashSet(new UserCacheModel
@@ -112,8 +117,7 @@ namespace GoodJobGames.Controllers
         [HttpGet("profile/{userId}")]
         public async Task<UserResponse> GetUser([FromRoute] Guid userId)
         {
-            if (userId == null)
-                throw new NotFoundException("User can not be found");
+            if (userId == null) throw new NotFoundException(nameof(User));
 
             UserResponse userResponse = new UserResponse();
             if (await _cacheService.IsHashExist(userId))
@@ -126,6 +130,7 @@ namespace GoodJobGames.Controllers
             else
             {
                 var user = await _userService.GetUserByGuid(userId);
+                if (user == null) throw new NotFoundException(nameof(User));
                 userResponse = _mapper.Map<UserResponse>(user);
 
                 _cacheService.HashSet(new UserCacheModel
@@ -148,7 +153,7 @@ namespace GoodJobGames.Controllers
         #region Bulk Import
 
         /// <summary>
-        /// Creates user
+        /// Creates user (EF error, not ready)
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
@@ -170,7 +175,7 @@ namespace GoodJobGames.Controllers
                 List<User> userList = new List<User>();
                 for (int i = 1; i <= request.NumberOfUsers; i++)
                 {
-                    userList.Add(generateUserDTO(request.UsernamePrefix, request.FixedPassword, rnd.Next(1, countryList.Count), i));
+                    userList.Add(generateUserDTO(request.UsernamePrefix, request.FixedPassword, countryList[rnd.Next(1, countryList.Count)], i));
                     if (i % 100 == 0)
                     {
                         await _userService.CreateUserRange(userList);
@@ -187,29 +192,16 @@ namespace GoodJobGames.Controllers
         }
 
 
-        private User generateUserDTO(string namePrefix, string fixedPassword, int countryId, int counter)
+        private User generateUserDTO(string namePrefix, string fixedPassword, Country country, int counter)
         {
             return new User
             {
-                GID = Guid.NewGuid(),
-                CountryId = countryId,
-                IsActive = true,
-                IsDeleted = false,
-                UpdatedOnUtc = DateTime.Now,
-                CreatedOnUtc = DateTime.Now,
+                CountryId = country.Id,
+                Country = null,
+                Score = null,
                 Password = fixedPassword != null ? fixedPassword : "123456",
                 Username = $"{namePrefix}-{counter}",
             };
-        }
-
-        private async Task generateScoreForNewUser(Guid guid)
-        {
-            //After Insert Trigger?
-            await _scoreService.SubmitScore(new UserScore()
-            {
-                UserId = guid,
-                Score = 0
-            });
         }
 
         private async Task<int> addToCacheAndGetRank(Guid guid, string countryIsoCode)
@@ -220,11 +212,10 @@ namespace GoodJobGames.Controllers
                 Id = guid
             };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryIsoCode}";
-            int rank = await _cacheService.SortedSetGetRank(key, cacheModel); 
-            if (rank == -1)
+            int rank;
+            if (!await _cacheService.hasAny(key, cacheModel))
                 await _cacheService.SortedSetAdd(key, 0, cacheModel);
-            else
-                rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            rank = await _cacheService.SortedSetGetRank(key, cacheModel);
             return rank;
         }
         #endregion

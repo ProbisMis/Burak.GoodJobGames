@@ -94,7 +94,7 @@ namespace GoodJobGames.Controllers
         /// <param name="userRequest"></param>
         /// <returns></returns>
         [HttpGet("")]
-        public async Task<LeaderboardListResponse> GetAllTest()
+        public async Task<LeaderboardListResponse> GetAll()
         {
             try
             {
@@ -115,7 +115,7 @@ namespace GoodJobGames.Controllers
                 else
                 {
                     int rankCounter = 0;
-                    var scores = await _scoreService.GetScores(500);
+                    var scores = await _scoreService.GetScores(100);
                     if (scores == null)
                         throw new NotFoundException(nameof(UserScore));
                     foreach (var item in scores)
@@ -164,13 +164,12 @@ namespace GoodJobGames.Controllers
                 else
                 {
                     int rankCounter = 0;
-                    var scores = await _scoreService.GetScores(500);
+                    var country = await _countryService.GetCountryByIsoCode(leaderboardRequest.CountryIsoCode);
+                    var scores = await _scoreService.GetScoresByCountry(100, country.Id);
                     if (scores == null)
                         throw new NotFoundException(nameof(UserScore));
                     foreach (var item in scores)
                     {
-                        if (item.User.Country.CountryIsoCode != leaderboardRequest.CountryIsoCode) //skip if not my country
-                            continue;
                         rankCounter++;
                         leaderboardResponse = await GenerateLeaderboardResponse(item.UserId, key, rankCounter);
 
@@ -228,6 +227,8 @@ namespace GoodJobGames.Controllers
             else
             {
                 var user = await _userService.GetUserByGuid(guid);
+                if (user == null) throw new NotFoundException(nameof(User));
+
                 leaderboardResponse = new LeaderboardResponse
                 {
                     Username = user.Username,
