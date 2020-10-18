@@ -10,7 +10,7 @@ namespace GoodJobGames.Data.Migrations
         public override void Up()
         {
 
-            Create.Table(nameof(Country)) //TODO: Seed with sample country
+            Create.Table(nameof(Country)) 
               .WithColumn("Id").AsInt32().PrimaryKey().Identity()
               .WithColumn("CountryName").AsString()
               .WithColumn("CountryIsoCode").AsString();
@@ -24,35 +24,19 @@ namespace GoodJobGames.Data.Migrations
             Create.Table(nameof(User)) //Seed with sample users and give guid on documentation
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
                 .WithColumn("GID").AsGuid().Unique().NotNullable()
-                .WithColumn("CountryId").AsInt32().ForeignKey(nameof(Country), "Id")
+                .WithColumn("CountryId").AsInt32().Nullable().ForeignKey(nameof(Country), "Id")
                 .WithColumn("Username").AsString().Nullable()
                 .WithColumn("Password").AsString().Nullable()
                 .WithColumn("IsActive").AsBoolean().WithDefaultValue(true)
                 .WithColumn("IsDeleted").AsBoolean().WithDefaultValue(false)
-                .WithColumn("CreatedOnUtc").AsDateTime().WithDefaultValue(DateTime.Now)
-                .WithColumn("UpdatedOnUtc").AsDateTime().WithDefaultValue(DateTime.Now)
-                .WithColumn("Token").AsString().Nullable();
-
-            //Seed
-            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-1" , Password = "123456", CountryId = 1});
-            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-2" , Password = "123456", CountryId = 1 });
-            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-3" , Password = "123456", CountryId = 1 });
-            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-4" , Password = "123456", CountryId = 2 });
-            //Insert.IntoTable(nameof(User)).Row(new { GID = Guid.NewGuid(), Username = "GJG-5" , Password = "123456", CountryId = 2 });
+                .WithColumn("CreatedOnUtc").AsDateTime2().WithDefaultValue(DateTime.Now)
+                .WithColumn("UpdatedOnUtc").AsDateTime2().WithDefaultValue(DateTime.Now);
 
 
             Create.Table(nameof(UserScore))
                 .WithColumn("Id").AsInt32().PrimaryKey().Identity()
                 .WithColumn("UserId").AsGuid().ForeignKey(nameof(User), "GID")
                 .WithColumn("Score").AsInt32();
-
-            ////Seed
-            //Insert.IntoTable(nameof(Score)).Row(new { Id = 1, CountryId = 1, UserScore = 100 });
-            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 2, CountryId = 1, UserScore = 200 });
-            //Insert.IntoTable(nameof(Score)).Row(new { UserId = 3, CountryId = 1, UserScore = 300 });
-
-
-
         }
 
         public override void Down()
