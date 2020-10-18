@@ -75,11 +75,11 @@ namespace GoodJobGames.Business.Services.Implementation
             return x.ToString();
         }
 
-        public List<LeaderboardCacheModel> SortedSetGetAll(string key)
+        public List<LeaderboardCacheModel> SortedSetGetAll(string key, int pageNumber)
         {
             try
             {
-                RedisValue[] values = _redisServer.Database.SortedSetRangeByRank(key, 0, 100, Order.Descending);
+                RedisValue[] values = _redisServer.Database.SortedSetRangeByRank(key, (pageNumber-1)*100, pageNumber*100, Order.Descending);
                 return CacheUtils.ToListLeaderboardCacheModel(values);
             }
             catch (Exception ex)

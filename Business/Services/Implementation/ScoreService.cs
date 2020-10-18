@@ -42,7 +42,7 @@ namespace GoodJobGames.Business.Services.Implementation
             return scores.ToList();
         }
 
-        public async Task<List<UserScore>> GetScoresByCountry(int numberOfRecords, int countryId)
+        public async Task<List<UserScore>> GetScoresByCountry(int pageNumber, int countryId)
         {
             var query =
                 from score in _dataContext.Scores
@@ -50,7 +50,7 @@ namespace GoodJobGames.Business.Services.Implementation
                 where user.CountryId == countryId
                 orderby score.Score descending
                 select score;
-            return query.Take(100).ToList();
+            return query.Skip((pageNumber-1)* 100).Take(100).ToList();
         }
        
 

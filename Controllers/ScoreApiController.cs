@@ -55,19 +55,18 @@ namespace GoodJobGames.Controllers
                 throw new ValidationException(validationResult.ToString());
             }
 
-            ScoreResponse scoreResponse = new ScoreResponse();
             var user = await _userService.GetUserByGuid(scoreRequest.UserId);
             if (user == null) throw new NotFoundException(nameof(User));
 
             var score = _mapper.Map<UserScore>(scoreRequest);
             await _scoreService.SubmitScore(score);
 
+            ScoreResponse scoreResponse = new ScoreResponse();
             scoreResponse.UserId = user.GID;
             scoreResponse.Timestamp = DateTime.Now;
             scoreResponse.Score = user.Score.Score;
-            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel{
-                Id = scoreRequest.UserId
-            };
+
+            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel { Id = scoreRequest.UserId };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
             var rank = await  _cacheService.SortedSetGetRank(key, cacheModel);
             if (rank == -1)

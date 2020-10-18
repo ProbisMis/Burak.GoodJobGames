@@ -20,7 +20,7 @@ namespace GoodJobGames.Business.Services.Interface
         Task SortedSetAdd(string key, int score, LeaderboardCacheModel data);
         Task SortedSetIncrement(string key, int score, LeaderboardCacheModel data);
         Task<string> SortedSetIntersect(string firstKey, string secondKey, string destination);
-        List<LeaderboardCacheModel> SortedSetGetAll(string key);
+        List<LeaderboardCacheModel> SortedSetGetAll(string key, int pageNumber);
         Task<bool> hasAny(string key, LeaderboardCacheModel data);
 
 

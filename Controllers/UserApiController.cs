@@ -91,6 +91,7 @@ namespace GoodJobGames.Controllers
                     });
 
                     var userResponseModel = _mapper.Map<UserResponse>(userResponse);
+                    userResponseModel.Rank = await addToCacheAndGetRank(userResponse.GID, country.CountryIsoCode); //Adds score info to sortedset
 
                     _cacheService.HashSet(new UserCacheModel
                     {
@@ -98,10 +99,13 @@ namespace GoodJobGames.Controllers
                         Username = userResponseModel.Username,
                         CountryIsoCode = userResponseModel.CountryIsoCode
                     });
-                    userResponseModel.Rank = await addToCacheAndGetRank(userResponse.GID, country.CountryIsoCode); //Adds score info to sortedset
                     return userResponseModel;
                 }
-                throw new ConflictException("Create user failed");
+                return new UserResponse
+                {
+                    ErrorCode = "400",
+                    Message = "User could not be created please try again later"
+                };
             }
             catch (Exception ex)
             {
@@ -194,8 +198,10 @@ namespace GoodJobGames.Controllers
 
         private User generateUserDTO(string namePrefix, string fixedPassword, Country country, int counter)
         {
+            var newGuid = Guid.NewGuid();
             return new User
             {
+                GID = newGuid,
                 CountryId = country.Id,
                 Country = null,
                 Score = null,

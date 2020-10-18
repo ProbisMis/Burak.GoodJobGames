@@ -87,14 +87,14 @@ namespace GoodJobGames.Controllers
            
         //}
 
-
+        
         /// <summary>
-        /// Gets global leaderboard
+        /// Returns global leaderboard by page each page has hundred record
         /// </summary>
-        /// <param name="userRequest"></param>
+        /// <param name="pageNumber"></param>
         /// <returns></returns>
-        [HttpGet("")]
-        public async Task<LeaderboardListResponse> GetAll()
+        [HttpGet("{pageNumber}")]
+        public async Task<LeaderboardListResponse> GetAll([FromRoute] int pageNumber)
         {
             try
             {
@@ -104,7 +104,7 @@ namespace GoodJobGames.Controllers
                 LeaderboardResponse leaderboardResponse;
                 if (_cacheService.hasAny(CacheKeyConstants.ALL_LEADERBOARD_KEY))
                 {
-                    List<LeaderboardCacheModel>  result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY);
+                    List<LeaderboardCacheModel>  result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY, pageNumber);
 
                     foreach (var item in result)
                     {
@@ -153,7 +153,7 @@ namespace GoodJobGames.Controllers
             {
                 if (_cacheService.hasAny(key))
                 {
-                    var result = _cacheService.SortedSetGetAll(key);
+                    var result = _cacheService.SortedSetGetAll(key, leaderboardRequest.PageNumber);
                     
                     foreach (var item in result)
                     {
@@ -165,7 +165,7 @@ namespace GoodJobGames.Controllers
                 {
                     int rankCounter = 0;
                     var country = await _countryService.GetCountryByIsoCode(leaderboardRequest.CountryIsoCode);
-                    var scores = await _scoreService.GetScoresByCountry(100, country.Id);
+                    var scores = await _scoreService.GetScoresByCountry(leaderboardRequest.PageNumber, country.Id);
                     if (scores == null)
                         throw new NotFoundException(nameof(UserScore));
                     foreach (var item in scores)

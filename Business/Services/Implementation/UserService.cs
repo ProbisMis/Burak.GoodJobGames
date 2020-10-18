@@ -26,6 +26,7 @@ namespace GoodJobGames.Business.Services.Implementation
         public async Task<User> CreateUser(User user)
         {
             user.GID = Guid.NewGuid();
+            user.IsActive = true;
             
             var newUser =  _dataContext.Users.Add(user);
             await _dataContext.SaveChangesAsync();

@@ -8,5 +8,6 @@ namespace GoodJobGames.Models.Requests
     public class LeaderboardRequest
     {
         public string CountryIsoCode { get; set; }
+        public int PageNumber { get; set; }
     }
 }
