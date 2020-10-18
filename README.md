@@ -8,6 +8,13 @@
 * From this point you should adjust appsettings.json file for database and redis connection strings, for database  either SQL or MySql server can be used by 
 for Redis i used AWS Elasticache, that should be in same VPC with EC2 instance and with all tcp ports open. 
 * Elasticache nginx config file is located in .platform file, which is needed for reverse proxy port setting. My application runs on port 5001, this can be changed but .platform/nginx/nginx.conf file should be changed as well.
+* In order to use IIS Express, comment the following lines from program.cs.  
+```
+  return WebHost.CreateDefaultBuilder(args)
+                          //.UseKestrel()
+                          //.UseContentRoot(Directory.GetCurrentDirectory())
+                          //.UseIISIntegration()
+```
 
 ### Include ###
 
