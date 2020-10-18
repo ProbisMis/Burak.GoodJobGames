@@ -75,18 +75,9 @@ namespace GoodJobGames.Controllers
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{user.Country.CountryIsoCode}";
             var rank = await  _cacheService.SortedSetGetRank(key, cacheModel);
             if (rank == -1)
-            {
-                //Add to cache
                 await _cacheService.SortedSetAdd(key, scoreResponse.Score, cacheModel);
-                scoreResponse.Message = "Added to Sorted Set";
-            }
             else
-            {
-                //Increment cache
                 await _cacheService.SortedSetIncrement(key, scoreRequest.Score, cacheModel);
-                scoreResponse.Message = "Incremented Sorted Set by " + scoreRequest.Score;
-            }
-
             
             return scoreResponse;
         }

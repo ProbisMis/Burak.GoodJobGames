@@ -12,24 +12,6 @@ namespace GoodJobGames.Utilities.Helper
 {
     public static class CacheUtils
     {
-        public static HashEntry[] generateHashEntry(UserResponse model)
-        {
-            HashEntry[] hashEntries = new HashEntry[1];
-            hashEntries.Append(new HashEntry("Username", model.Username));
-
-            return hashEntries;
-        }
-
-        public static List<string> generateStringFromHashEntry(HashEntry[] model)
-        {
-            List<string> response = new List<string>();
-            foreach (var item in model)
-            {
-                response.Add(item.ToString());
-            }
-            return response;
-        }
-
         public static List<LeaderboardCacheModel> ToListLeaderboardCacheModel(RedisValue[] values)
         {
             List<LeaderboardCacheModel> response = new List<LeaderboardCacheModel>();

@@ -77,8 +77,9 @@ namespace GoodJobGames.Controllers
             {
                 var user = _mapper.Map<User>(userRequest);
                 var country = await _countryService.GetCountryByIsoCode(userRequest.CountryIsoCode);
-                if (country != null)
-                    user.CountryId = country.Id;
+                if (country == null)
+                    throw new NotFoundException(nameof(Country));
+                user.CountryId = country.Id;
 
                 var userResponse = await _userService.CreateUser(user);
                 if (userResponse != null)
@@ -95,7 +96,7 @@ namespace GoodJobGames.Controllers
                     userResponseModel.Rank = await addToCacheAndGetRank(userResponse.GID, country.CountryIsoCode); //Adds score info to sortedset
                     return userResponseModel;
                 }
-                return null; 
+                throw new ConflictException("Create user failed");
             }
             catch (Exception ex)
             {
@@ -119,11 +120,7 @@ namespace GoodJobGames.Controllers
             {
                 var cachedUser = await _cacheService.HashGetAll(userId);
                 userResponse.GID = userId;
-                userResponse.Username = await _cacheService.HashGet(new UserCacheModel
-                {
-                    GID = userId
-                }, 
-                "Username");
+                userResponse.Username = cachedUser.GetValueOrDefault("Username");
                 userResponse.CountryIsoCode = cachedUser.GetValueOrDefault("CountryIsoCode");
             }
             else
@@ -139,15 +136,9 @@ namespace GoodJobGames.Controllers
                 });
             }
 
-            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel
-            {
-                Id = userId
-            };
+            LeaderboardCacheModel cacheModel = new LeaderboardCacheModel { Id = userId };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{userResponse.CountryIsoCode}";
-            var rank = await _cacheService.SortedSetGetRank(key, cacheModel);
-            if (rank == -1)
-                await _cacheService.SortedSetAdd(key, 0, cacheModel);
-            userResponse.Rank = await _cacheService.SortedSetGetRank(key, cacheModel); 
+            userResponse.Rank =  await addToCacheAndGetRank(userResponse.GID, userResponse.CountryIsoCode); //Adds score info to sortedset
             userResponse.Score = await _cacheService.SortedSetGetScore(key, cacheModel);
 
             return userResponse;
@@ -229,8 +220,11 @@ namespace GoodJobGames.Controllers
                 Id = guid
             };
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryIsoCode}";
-            await _cacheService.SortedSetAdd(key, 0, cacheModel);
-            var rank = await _cacheService.SortedSetGetRank(key, cacheModel);
+            int rank = await _cacheService.SortedSetGetRank(key, cacheModel); 
+            if (rank == -1)
+                await _cacheService.SortedSetAdd(key, 0, cacheModel);
+            else
+                rank = await _cacheService.SortedSetGetRank(key, cacheModel);
             return rank;
         }
         #endregion

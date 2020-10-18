@@ -1,17 +1,13 @@
 ﻿using GoodJobGames.Business.Services.Interface;
 using GoodJobGames.Data;
-using GoodJobGames.Models;
 using GoodJobGames.Models.CacheModel;
-using GoodJobGames.Models.Responses;
+using GoodJobGames.Models.CustomExceptions;
 using GoodJobGames.Utilities.Constants;
 using GoodJobGames.Utilities.Helper;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace GoodJobGames.Business.Services.Implementation
@@ -19,19 +15,10 @@ namespace GoodJobGames.Business.Services.Implementation
     public class RedisCacheService : ICacheService
     {
         private readonly RedisServer _redisServer;
-
         public RedisCacheService(RedisServer redisServer)
         {
             _redisServer = redisServer;
         }
-
-        public bool SortedSetAny<T>(string key, T data)
-        {
-            RedisValue value = RedisSerializer.Serialize(data);
-            var x = _redisServer.Database.SortedSetScore(key, value);
-            return  x == null ? false : true;
-        }
-
         public void Clear()
         {
             _redisServer.FlushDatabase();
@@ -54,6 +41,14 @@ namespace GoodJobGames.Business.Services.Implementation
             await _redisServer.Database.SortedSetIncrementAsync(CacheKeyConstants.ALL_LEADERBOARD_KEY, JsonConvert.SerializeObject(data), score);
         }
 
+        public async Task<bool> hasAny(string key, LeaderboardCacheModel data)
+        {
+            var x = await _redisServer.Database.SortedSetRankAsync(key, JsonConvert.SerializeObject(data), Order.Descending);
+            if (x.HasValue)
+                return true;
+            return false;
+        }
+        
         public async Task<int> SortedSetGetRank(string key, LeaderboardCacheModel data)
         {
             var x = await _redisServer.Database.SortedSetRankAsync(key, JsonConvert.SerializeObject(data), Order.Descending);
@@ -80,26 +75,23 @@ namespace GoodJobGames.Business.Services.Implementation
             return x.ToString();
         }
 
-        public void SortedSetAddRange<T>(string key, List<T> data)
-        {
-            throw new NotImplementedException();
-        }
-
-
         public List<LeaderboardCacheModel> SortedSetGetAll(string key)
         {
-            RedisValue[] values = _redisServer.Database.SortedSetRangeByRank(key);
-            return CacheUtils.ToListLeaderboardCacheModel(values);
+            try
+            {
+                RedisValue[] values = _redisServer.Database.SortedSetRangeByRank(key, 0, 100, Order.Descending);
+                return CacheUtils.ToListLeaderboardCacheModel(values);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         public bool hasAny(string key)
         {
             return _redisServer.Database.KeyExists(key);
-        }
-
-        public Task<string> SortedSetGetAllCacheModel(string key)
-        {
-            throw new NotImplementedException();
         }
 
         public async void HashSet(UserCacheModel model)
@@ -110,7 +102,11 @@ namespace GoodJobGames.Business.Services.Implementation
         public async Task<string> HashGet(UserCacheModel model, string propertyName)
         {
             var value = await _redisServer.Database.HashGetAsync($"{CacheKeyConstants.USER_KEY}.{model.GID}", propertyName);
-            return value;
+            if (value.HasValue)
+            {
+                return value;
+            }
+            throw new NotFoundException(propertyName + " cannot be found on key: " + model.GID);
         }
 
         public async Task<Dictionary<string, string>> HashGetAll(Guid key)
@@ -127,7 +123,9 @@ namespace GoodJobGames.Business.Services.Implementation
             return false;
         }
 
-        
+       
+
+
 
         //public string SortedSetGet<T>(string key, int rank)
         //{

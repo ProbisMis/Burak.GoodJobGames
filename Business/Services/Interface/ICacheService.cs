@@ -10,18 +10,21 @@ namespace GoodJobGames.Business.Services.Interface
 {
     public interface ICacheService
     {
-        void SortedSetAddRange<T>(string key, List<T> data);
-        List<LeaderboardCacheModel> SortedSetGetAll(string key);
         void Remove(string key);
         void Clear();
         bool hasAny(string key);
+
+        /* SORTED SET*/
         Task<int> SortedSetGetScore(string key, LeaderboardCacheModel data);
         Task<int> SortedSetGetRank(string key, LeaderboardCacheModel data);
         Task SortedSetAdd(string key, int score, LeaderboardCacheModel data);
         Task SortedSetIncrement(string key, int score, LeaderboardCacheModel data);
-        Task<string> SortedSetGetAllCacheModel(string key);
         Task<string> SortedSetIntersect(string firstKey, string secondKey, string destination);
+        List<LeaderboardCacheModel> SortedSetGetAll(string key);
+        Task<bool> hasAny(string key, LeaderboardCacheModel data);
 
+
+        /* HASH */
         Task<Dictionary<string,string>> HashGetAll(Guid key);
         void HashSet(UserCacheModel model);
         Task<string> HashGet(UserCacheModel model, string propertyName);

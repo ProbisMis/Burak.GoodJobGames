@@ -17,9 +17,6 @@ namespace GoodJobGames.Data
         {
             CreateRedisConfigurationString(configuration);
             
-            //var csredis = new CSRedis.CSRedisClient(configurationString);
-            //RedisHelper.Initialization(csredis);
-
             _connectionMultiplexer = ConnectionMultiplexer.Connect(configurationString);
             _database = _connectionMultiplexer.GetDatabase(_currentDatabaseId);
         }

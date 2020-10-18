@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using GoodJobGames.Business.Services.Interface;
 using GoodJobGames.Data.EntityModels;
-using GoodJobGames.Models;
 using GoodJobGames.Models.CacheModel;
 using GoodJobGames.Models.CustomExceptions;
 using GoodJobGames.Models.Requests;
@@ -9,13 +8,11 @@ using GoodJobGames.Models.Responses;
 using GoodJobGames.Utilities.Constants;
 using GoodJobGames.Utilities.ValidationHelper.ValidatorResolver;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GoodJobGames.Controllers
@@ -51,47 +48,96 @@ namespace GoodJobGames.Controllers
             _countryService = countryService;
         }
 
+        ///// <summary>
+        ///// Gets  user
+        ///// </summary>
+        ///// <param name="userRequest"></param>
+        ///// <returns></returns>
+        //[HttpGet("")]
+        //public async Task<string> GetAll()
+        //{
+        //    try
+        //    {
+        //        var countryList = await _countryService.GetAllCountry();
+        //        List<LeaderboardCacheModel> result;
+        //        if (_cacheService.hasAny(CacheKeyConstants.ALL_LEADERBOARD_KEY))
+        //        {
+        //            result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY);
+        //        }
+        //        else
+        //        {
+        //            for (int i = 1; i < countryList.Count; i++)
+        //            {
+        //                if (i == 1)
+        //                    await _cacheService.SortedSetIntersect($"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i - 1].CountryIsoCode}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY);
+        //                else if (i == countryList.Count - 1)
+        //                    await _cacheService.SortedSetIntersect($"{CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_KEY);
+        //                else
+        //                    await _cacheService.SortedSetIntersect($"{CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY);
+        //            }
+        //        }
+        //        result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY);
+        //        return JsonConvert.SerializeObject(result);
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+           
+        //}
+
+
         /// <summary>
-        /// Gets  user
+        /// Gets global leaderboard
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
         [HttpGet("")]
-        public async Task<string> GetAll()
+        public async Task<LeaderboardListResponse> GetAllTest()
         {
             try
             {
                 var countryList = await _countryService.GetAllCountry();
-                List<LeaderboardCacheModel> result;
+                LeaderboardListResponse response = new LeaderboardListResponse();
+                response.LeaderboardResponses = new List<LeaderboardResponse>();
+                LeaderboardResponse leaderboardResponse;
                 if (_cacheService.hasAny(CacheKeyConstants.ALL_LEADERBOARD_KEY))
                 {
-                    result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY);
+                    List<LeaderboardCacheModel>  result = _cacheService.SortedSetGetAll(CacheKeyConstants.ALL_LEADERBOARD_KEY);
+
+                    foreach (var item in result)
+                    {
+                        leaderboardResponse = await GenerateLeaderboardResponse(item.Id, CacheKeyConstants.ALL_LEADERBOARD_KEY);
+                        response.LeaderboardResponses.Add(leaderboardResponse);
+                    }
                 }
                 else
                 {
-                    for (int i = 1; i < countryList.Count; i++)
+                    int rankCounter = 0;
+                    var scores = await _scoreService.GetScores(500);
+                    if (scores == null)
+                        throw new NotFoundException(nameof(UserScore));
+                    foreach (var item in scores)
                     {
-                        if (i == 1)
-                            await _cacheService.SortedSetIntersect($"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i - 1].CountryIsoCode}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY);
-                        else if (i == countryList.Count - 1)
-                            await _cacheService.SortedSetIntersect($"{CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_KEY);
-                        else
-                            await _cacheService.SortedSetIntersect($"{CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY}", $"{CacheKeyConstants.LEADERBOARD_KEY}.{countryList[i].CountryIsoCode}", CacheKeyConstants.ALL_LEADERBOARD_TEMP_KEY);
+                        rankCounter++;
+                        leaderboardResponse = await GenerateLeaderboardResponse(item.UserId, CacheKeyConstants.ALL_LEADERBOARD_KEY, rankCounter);
+
+                        await _cacheService.SortedSetAdd(CacheKeyConstants.ALL_LEADERBOARD_KEY, item.Score, new LeaderboardCacheModel { Id = Guid.Parse(item.UserId.ToString()) });
+                        response.LeaderboardResponses.Add(leaderboardResponse);
                     }
                 }
-                result = _cacheService.SortedSetGetAll(CacheKeyConstants.LEADERBOARD_KEY);
-                return JsonConvert.SerializeObject(result);
+                return response;
             }
             catch (Exception)
             {
-
                 throw;
             }
-           
+
         }
 
         /// <summary>
-        /// Gets  user
+        /// Gets country specific leaderboard
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
@@ -99,38 +145,36 @@ namespace GoodJobGames.Controllers
         public async Task<LeaderboardListResponse> GetAllByKey([FromBody] LeaderboardRequest leaderboardRequest)
         {
             LeaderboardListResponse response = new LeaderboardListResponse();
+            response.LeaderboardResponses = new List<LeaderboardResponse>();
+            LeaderboardResponse leaderboardResponse;
+
             string key = $"{CacheKeyConstants.LEADERBOARD_KEY}.{leaderboardRequest.CountryIsoCode}";
             try
             {
                 if (_cacheService.hasAny(key))
                 {
-                    var result = _cacheService.SortedSetGetAll($"{CacheKeyConstants.LEADERBOARD_KEY}.{leaderboardRequest.CountryIsoCode}");
-                    if (result == null)
-                        return new LeaderboardListResponse
-                        {
-                            Message = "SortedSetGetAll NULL"
-                        };
+                    var result = _cacheService.SortedSetGetAll(key);
+                    
                     foreach (var item in result)
                     {
-                        if (item == null)
-                            return new LeaderboardListResponse
-                            {
-                                Message = "Item in Result is  NULL"
-                            };
-                        var properties = await _cacheService.HashGetAll(Guid.Parse(item.Id.ToString()));
-                        if (properties == null)
-                            return new LeaderboardListResponse
-                            {
-                                Message = "HashGetAll NULL"
-                            };
-                        var leaderboardCacheModel = new LeaderboardCacheModel { Id = Guid.Parse(item.Id.ToString()) };
-                        var leaderboardResponse = new LeaderboardResponse
-                        {
-                            Username = properties.GetValueOrDefault("Username"),
-                            CountryName = properties.GetValueOrDefault("CountryIsoCode"),
-                            Rank = await _cacheService.SortedSetGetRank(key, leaderboardCacheModel),
-                            Score = await _cacheService.SortedSetGetScore(key, leaderboardCacheModel)
-                        };
+                        leaderboardResponse = await GenerateLeaderboardResponse(item.Id, key);
+                        response.LeaderboardResponses.Add(leaderboardResponse);
+                    }
+                }
+                else
+                {
+                    int rankCounter = 0;
+                    var scores = await _scoreService.GetScores(500);
+                    if (scores == null)
+                        throw new NotFoundException(nameof(UserScore));
+                    foreach (var item in scores)
+                    {
+                        if (item.User.Country.CountryIsoCode != leaderboardRequest.CountryIsoCode) //skip if not my country
+                            continue;
+                        rankCounter++;
+                        leaderboardResponse = await GenerateLeaderboardResponse(item.UserId, key, rankCounter);
+
+                        await _cacheService.SortedSetAdd(CacheKeyConstants.ALL_LEADERBOARD_KEY, item.Score, new LeaderboardCacheModel { Id = item.UserId});
                         response.LeaderboardResponses.Add(leaderboardResponse);
                     }
                 }
@@ -144,7 +188,7 @@ namespace GoodJobGames.Controllers
         }
 
         /// <summary>
-        /// Gets  user
+        /// Flush all databases & keys
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
@@ -155,15 +199,53 @@ namespace GoodJobGames.Controllers
         }
 
         /// <summary>
-        /// Gets  user
+        /// Flush specific key
         /// </summary>
         /// <param name="userRequest"></param>
         /// <returns></returns>
         [HttpPost("flushbykey")]
-        public async Task FlushDB([FromBody] LeaderboardRequest leaderboardRequest)
+        public async Task FlushDB([FromBody] CacheKeyModel request)
         {
-            _cacheService.Remove($"{CacheKeyConstants.LEADERBOARD_KEY}.{leaderboardRequest.CountryIsoCode}");
+            _cacheService.Remove(request.Key);
 
+        }
+
+        private async Task<LeaderboardResponse> GenerateLeaderboardResponse(Guid guid, string key, int rank = -1)
+        {
+            LeaderboardResponse leaderboardResponse;
+            var leaderboardCacheModel = new LeaderboardCacheModel { Id = Guid.Parse(guid.ToString()) };
+            var userCachemodel = new UserCacheModel { GID = Guid.Parse(guid.ToString()) };
+            if (await _cacheService.IsHashExist(guid))
+            {
+                leaderboardResponse = new LeaderboardResponse
+                {
+                    Username = await _cacheService.HashGet(userCachemodel, "Username"),
+                    CountryName = await _cacheService.HashGet(userCachemodel, "CountryIsoCode"),
+                    Rank = rank == -1  ? await addToCacheAndGetRank(key, leaderboardCacheModel) : rank,
+                    Score = await _cacheService.SortedSetGetScore(key, leaderboardCacheModel)
+                };
+            }
+            else
+            {
+                var user = await _userService.GetUserByGuid(guid);
+                leaderboardResponse = new LeaderboardResponse
+                {
+                    Username = user.Username,
+                    CountryName = user.Country.CountryIsoCode,
+                    Rank = await addToCacheAndGetRank(key, leaderboardCacheModel),
+                    Score = await _cacheService.SortedSetGetScore(key, leaderboardCacheModel)
+                };
+            }
+            return leaderboardResponse;
+        }
+
+        private async Task<int> addToCacheAndGetRank(string key, LeaderboardCacheModel model)
+        {
+            int rank = -1;
+            if (!await _cacheService.hasAny(key,model))
+                await _cacheService.SortedSetAdd(key, 0, model);
+            rank = await _cacheService.SortedSetGetRank(key, model);
+            return rank;
         }
 
     }

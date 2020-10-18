@@ -1,8 +1,7 @@
-﻿using AutoMapper.Configuration;
-using GoodJobGames.Business.Services.Interface;
+﻿using GoodJobGames.Business.Services.Interface;
 using GoodJobGames.Data;
 using GoodJobGames.Data.EntityModels;
-using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +21,6 @@ namespace GoodJobGames.Business.Services.Implementation
 
         public async Task SubmitScore(UserScore score)
         {
-
-            //TODO: ID maybe problem for updating score
             var foundScore = GetScoreByUserId(score.UserId);
             if (foundScore == null)
             {
@@ -38,12 +35,11 @@ namespace GoodJobGames.Business.Services.Implementation
             await _dataContext.SaveChangesAsync();
         }
 
-        private bool isExist(UserScore score)
+        public async Task<List<UserScore>> GetScores(int numberOfRecords)
         {
-            var result = _dataContext.Scores.FirstOrDefault(x => x.UserId == score.UserId);
-            if (result == null)
-                return false;
-            return true;
+
+            var scores = _dataContext.Scores.Include(x=> x.User.Country).OrderByDescending(x => x.Score).Take(numberOfRecords);
+            return scores.ToList();
         }
 
         public UserScore GetScoreByUserId(Guid userId)
