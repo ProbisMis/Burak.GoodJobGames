@@ -1,5 +1,7 @@
 ## .NET Core 3.0 Simple Leaderboard with Redis and AWS Elasticbeanstalk ##
 
+Runnşing Application URL: http://gjgapp-env-2.eba-4evmpt3c.eu-central-1.elasticbeanstalk.com/swagger/index.html
+
 ### Installation ###
 
 * type `git clone https://github.com/ProbisMis/Burak.GoodJobGames.git projectname` to clone the repository 
